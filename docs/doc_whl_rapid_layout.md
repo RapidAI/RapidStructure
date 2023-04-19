@@ -1,8 +1,9 @@
-## rapid-layout Package
-<p>
+## rapid-layout
+<p align="left">
     <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg"></a>
     <a href="https://pypi.org/project/rapid-layout/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rapid-layout"></a>
+    <a href="https://pepy.tech/project/rapid-layout"><img src="https://static.pepy.tech/personalized-badge/rapid-layout?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 </p>
 
 ### 1. Install package by pypi.
@@ -12,8 +13,8 @@ $ pip install rapid-layout
 
 ### 2. Run by script.
 - RapidLayout has the default `model_path` value, you can set the different value of `model_path` to use different models, e.g. `layout_engine = RapidLayout(model_path='layout_publaynet.onnx')`
-- See details, for [README_Layout](https://github.com/RapidAI/RapidOCR/blob/f133ff008a1c60edd6e0ed882da83873aa7b113a/python/rapid_structure/docs/README_Layout.md) .
-- 📌 `layout.png` source: [link](https://github.com/RapidAI/RapidOCR/blob/f133ff008a1c60edd6e0ed882da83873aa7b113a/python/rapid_structure/test_images/layout.png)
+- See details, for [README_Layout](https://github.com/RapidAI/RapidStructure/blob/main/docs/README_Layout.md) .
+- 📌 `layout.png` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/layout.png)
 
 ```python
 import cv2

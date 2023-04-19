@@ -1,7 +1,9 @@
-## rapid-table Package
-<p>
+## rapid-table
+<p align="left">
     <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg"></a>
+    <a href="https://pypi.org/project/rapid-table/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rapid-table"></a>
+    <a href="https://pepy.tech/project/rapid-table"><img src="https://static.pepy.tech/personalized-badge/rapid-table?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 </p>
 
 ### 1. Install package by pypi.
@@ -11,8 +13,8 @@ $ pip install rapid-table
 
 ### 2. Run by script.
 - RapidTable has the default `model_path` value, you can set the different value of `model_path` to use different models, e.g. `table_engine = RapidTable(model_path='ch_ppstructure_mobile_v2_SLANet.onnx')`
-- See details, for [README_Table](https://github.com/RapidAI/RapidOCR/blob/a87133a6fc3b8ee696e246028e529f7b2319d138/python/rapid_structure/docs/README_Table.md) .
-- 📌 `table.jpg` source: [link](https://github.com/RapidAI/RapidOCR/blob/a87133a6fc3b8ee696e246028e529f7b2319d138/python/rapid_structure/test_images/table.jpg)
+- See details, for [README_Table](https://github.com/RapidAI/RapidStructure/blob/main/docs/README_Table.md) .
+- 📌 `table.jpg` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/table.jpg)
 
 ```python
 import cv2
