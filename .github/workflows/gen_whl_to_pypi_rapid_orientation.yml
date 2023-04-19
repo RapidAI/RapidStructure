@@ -34,7 +34,6 @@ jobs:
           unzip $ZIP_NAME
           rm rapid_orientation/models/.gitkeep
           mv $DIR_NAME/*.onnx rapid_orientation/models/
-          cd python/rapid_structure
           pip install -r requirements.txt
           cd tests
           pytest test_orientation.py
@@ -54,7 +53,6 @@ jobs:
 
       - name: Run setup
         run: |
-          cd python/rapid_structure
           pip install -r requirements.txt
           wget $RESOURCES_URL
           ZIP_NAME=${RESOURCES_URL##*/}

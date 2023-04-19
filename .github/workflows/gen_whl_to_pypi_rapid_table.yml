@@ -36,7 +36,6 @@ jobs:
           DIR_NAME=${ZIP_NAME%.*}
           unzip $DIR_NAME
           cp $DIR_NAME/*.onnx rapid_table/models/
-          cd python/rapid_structure
           pip install -r requirements.txt
           pip install rapidocr_onnxruntime
           pytest tests/test_table.py
@@ -56,7 +55,6 @@ jobs:
 
       - name: Run setup
         run: |
-          cd python/rapid_structure
           pip install -r requirements.txt
           wget $RESOURCES_URL
           ZIP_NAME=${RESOURCES_URL##*/}
