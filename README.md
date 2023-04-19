@@ -8,6 +8,7 @@
 </p>
 
 - 该部分的功能主要针对文档类图像，包括文档图像分类、版面分析和表格识别。
+- 可配套使用项目：[RapidOCR](https://github.com/RapidAI/RapidOCR)
 
 ### [版面分析](./docs/README_Layout.md)
 
