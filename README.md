@@ -7,6 +7,7 @@
     <a href="https://pepy.tech/project/rapid-table"><img src="https://static.pepy.tech/personalized-badge/rapid-table?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=rapid-table"></a>
 </p>
 
+- 🎉🎉🎉 推出知识星球[RapidAI私享群](https://t.zsxq.com/0duLBZczw)，这里的提问会优先得到回答和支持，也会享受到RapidAI组织后续持续优质的服务，欢迎大家的加入。
 - 该部分的功能主要针对文档类图像，包括文档图像分类、版面分析和表格识别。
 - 可配套使用项目：[RapidOCR](https://github.com/RapidAI/RapidOCR)
 
