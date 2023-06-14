@@ -14,12 +14,13 @@
 import argparse
 import time
 from pathlib import Path
+from typing import Union
 
 import cv2
 import numpy as np
 
 from .utils import (OrtInferSession, PicoDetPostProcess, create_operators,
-                    read_yaml, transform, vis_layout)
+                    read_yaml, transform, vis_layout, LoadImage)
 
 root_dir = Path(__file__).resolve().parent
 
@@ -39,8 +40,11 @@ class RapidLayout():
         self.preprocess_op = create_operators(config['pre_process'])
         self.postprocess_op = PicoDetPostProcess(labels,
                                                  **config['post_process'])
+        self.load_img = LoadImage()
 
-    def __call__(self, img):
+    def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
+        img = self.load_img(img_content)
+
         ori_im = img.copy()
         data = {'image': img}
         data = transform(data, self.preprocess_op)

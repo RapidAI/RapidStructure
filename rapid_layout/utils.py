@@ -3,14 +3,18 @@
 # @Contact: liekkaskono@163.com
 import copy
 import warnings
+from io import BytesIO
 from pathlib import Path
+from typing import Union
 
-import yaml
 import cv2
 import numpy as np
-from onnxruntime import (get_available_providers, get_device,
-                         SessionOptions, InferenceSession,
-                         GraphOptimizationLevel)
+import yaml
+from onnxruntime import (GraphOptimizationLevel, InferenceSession,
+                         SessionOptions, get_available_providers, get_device)
+from PIL import Image, UnidentifiedImageError
+
+InputType = Union[str, np.ndarray, bytes, Path]
 
 
 class OrtInferSession():
@@ -72,6 +76,70 @@ class ONNXRuntimeError(Exception):
     pass
 
 
+class LoadImage():
+    def __init__(self, ):
+        pass
+
+    def __call__(self, img: InputType) -> np.ndarray:
+        if not isinstance(img, InputType.__args__):
+            raise LoadImageError(
+                f'The img type {type(img)} does not in {InputType.__args__}')
+
+        img = self.load_img(img)
+
+        if img.ndim == 2:
+            return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+        if img.ndim == 3 and img.shape[2] == 4:
+            return self.cvt_four_to_three(img)
+
+        return img
+
+    def load_img(self, img: InputType) -> np.ndarray:
+        if isinstance(img, (str, Path)):
+            self.verify_exist(img)
+            try:
+                img = np.array(Image.open(img))
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            except UnidentifiedImageError as e:
+                raise LoadImageError(
+                    f'cannot identify image file {img}') from e
+            return img
+
+        if isinstance(img, bytes):
+            img = np.array(Image.open(BytesIO(img)))
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            return img
+
+        if isinstance(img, np.ndarray):
+            return img
+
+        raise LoadImageError(f'{type(img)} is not supported!')
+
+    @staticmethod
+    def cvt_four_to_three(img: np.ndarray) -> np.ndarray:
+        '''RGBA → RGB
+        '''
+        r, g, b, a = cv2.split(img)
+        new_img = cv2.merge((b, g, r))
+
+        not_a = cv2.bitwise_not(a)
+        not_a = cv2.cvtColor(not_a, cv2.COLOR_GRAY2BGR)
+
+        new_img = cv2.bitwise_and(new_img, new_img, mask=a)
+        new_img = cv2.add(new_img, not_a)
+        return new_img
+
+    @staticmethod
+    def verify_exist(file_path: Union[str, Path]):
+        if not Path(file_path).exists():
+            raise LoadImageError(f'{file_path} does not exist.')
+
+
+class LoadImageError(Exception):
+    pass
+
+
 def transform(data, ops=None):
     """ transform """
     if ops is None:
@@ -95,7 +163,7 @@ def create_operators(op_param_dict):
 
 
 class Resize():
-    def __init__(self, size=(640, 640), **kwargs):
+    def __init__(self, size=(640, 640)):
         self.size = size
 
     def resize_image(self, img):
@@ -125,9 +193,10 @@ class Resize():
 
 
 class NormalizeImage():
-    def __init__(self, scale=None, mean=None, std=None, order='chw', **kwargs):
+    def __init__(self, scale=None, mean=None, std=None, order='chw'):
         if isinstance(scale, str):
             scale = eval(scale)
+
         self.scale = np.float32(scale if scale is not None else 1.0 / 255.0)
         mean = mean if mean is not None else [0.485, 0.456, 0.406]
         std = std if std is not None else [0.229, 0.224, 0.225]
@@ -156,7 +225,7 @@ class ToCHWImage():
 
 
 class KeepKeys():
-    def __init__(self, keep_keys, **kwargs):
+    def __init__(self, keep_keys):
         self.keep_keys = keep_keys
 
     def __call__(self, data):

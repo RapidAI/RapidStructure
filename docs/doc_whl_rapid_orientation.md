@@ -17,13 +17,12 @@ $ pip install rapid-orientation
 - 📌 `layout.png` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/layout.png)
 
 ```python
-import cv2
 from rapid_orientation import RapidOrientation
 
 orientation_engine = RapidOrientation()
 
-img = cv2.imread('test_images/layout.png')
-
+with open('test_images/layout.png', 'rb') as f:
+    img = f.read()
 orientation_res, elapse = orientation_engine(img)
 print(orientation_res)
 ```

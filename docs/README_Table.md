@@ -24,7 +24,7 @@
         $ pip install rapid-table
         ```
 2. python脚本运行
-   ```python
+    ````python
     import cv2
     from rapid_table import RapidTable
 
@@ -35,7 +35,7 @@
     img = cv2.imread('test_images/table.jpg')
     table_html_str, _ = table_engine(img)
     print(table_html_str)
-   ```
+    ````
 3. 终端运行
    - 用法:
      ```bash

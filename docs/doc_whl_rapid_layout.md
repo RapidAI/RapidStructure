@@ -17,12 +17,12 @@ $ pip install rapid-layout
 - 📌 `layout.png` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/layout.png)
 
 ```python
-import cv2
 from rapid_layout import RapidLayout
 
 layout_engine = RapidLayout()
 
-img = cv2.imread('layout.png')
+with open('layout.png', 'rb') as f:
+    img = f.read()
 
 layout_res, elapse = layout_engine(img)
 print(layout_res)

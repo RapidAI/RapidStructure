@@ -5,6 +5,7 @@ import argparse
 import copy
 import time
 from pathlib import Path
+from typing import Union
 
 import cv2
 import numpy as np
@@ -12,6 +13,7 @@ from rapidocr_onnxruntime import RapidOCR
 
 from .table_matcher import TableMatch
 from .table_structure import TableStructurer
+from .utils import LoadImage, vis_table
 
 root_dir = Path(__file__).resolve().parent
 
@@ -26,7 +28,11 @@ class RapidTable():
         self.table_structure = TableStructurer(model_path)
         self.table_matcher = TableMatch()
 
-    def __call__(self, img):
+        self.load_img = LoadImage()
+
+    def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
+        img = self.load_img(img_content)
+
         s = time.time()
         dt_boxes, rec_res = self._ocr(copy.deepcopy(img))
 
@@ -54,18 +60,6 @@ class RapidTable():
             r_boxes.append(box)
         dt_boxes = np.array(r_boxes)
         return dt_boxes, rec_res
-
-
-def vis_table(table_res: str, save_path: str) -> None:
-    style_res = '''<style>td {border-left: 1px solid;border-bottom:1px solid;}
-                   table, th {border-top:1px solid;font-size: 10px;
-                   border-collapse: collapse;border-right: 1px solid;}
-                </style>'''
-    prefix_table, suffix_table = table_res.split('<body>')
-    new_table_res = f'{prefix_table}{style_res}<body>{suffix_table}'
-    with open(save_path, 'w', encoding='utf-8') as f:
-        f.write(new_table_res)
-    print(f'The infer result has saved in {save_path}')
 
 
 def main() -> None:

@@ -17,12 +17,12 @@ $ pip install rapid-table
 - 📌 `table.jpg` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/table.jpg)
 
 ```python
-import cv2
 from rapid_table import RapidTable
 
 table_engine = RapidTable()
 
-img = cv2.imread('table.jpg')
+with open('table.jpg', 'rb') as f:
+    img = f.read()
 table_html_str, _ = table_engine(img)
 print(table_html_str)
 ```

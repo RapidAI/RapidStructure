@@ -17,12 +17,13 @@
 import argparse
 import time
 from pathlib import Path
-import cv2
+from typing import Union
 
+import cv2
 import numpy as np
 import yaml
 
-from .utils import OrtInferSession, create_operators
+from .utils import LoadImage, OrtInferSession, create_operators
 
 root_dir = Path(__file__).resolve().parent
 
@@ -40,7 +41,11 @@ class RapidOrientation():
 
         self.preprocess_ops = create_operators(config["PreProcess"])
 
-    def __call__(self, images):
+        self.load_img = LoadImage()
+
+    def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
+        images = self.load_img(img_content)
+
         s = time.time()
         for ops in self.preprocess_ops:
             images = ops(images)

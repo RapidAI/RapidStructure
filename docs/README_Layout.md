@@ -25,7 +25,7 @@
         $ pip install rapid-layout
         ```
 2. python脚本运行
-   ```python
+    ```python
     import cv2
     from rapid_layout import RapidLayout
 
@@ -36,7 +36,7 @@
     img = cv2.imread('test_images/layout.png')
 
     layout_res, elapse = layout_engine(img)
-   ```
+    ```
 
 3. 终端运行
    - 用法:

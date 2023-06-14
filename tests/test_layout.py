@@ -5,20 +5,32 @@ import sys
 from pathlib import Path
 
 import cv2
+import pytest
 
-root_dir = Path(__file__).resolve().parent.parent
+cur_dir = Path(__file__).resolve().parent
+root_dir = cur_dir.parent
 
 sys.path.append(str(root_dir))
 
 from rapid_layout import RapidLayout
 
+test_file_dir = cur_dir / 'test_files'
+layout_engine = RapidLayout()
 
-def test_layout():
-    img_path = str(root_dir / 'test_images' / 'layout.png')
-    img = cv2.imread(img_path)
+img_path = test_file_dir / 'layout.png'
 
-    layout_engine = RapidLayout()
+img = cv2.imread(str(img_path))
 
-    layout_res, elapse = layout_engine(img)
+@pytest.mark.parametrize(
+    'img_content',
+    [
+        img_path,
+        str(img_path),
+        open(img_path, 'rb').read(),
+        img
+    ]
+)
+def test_multi_input(img_content):
+    layout_res, elapse = layout_engine(img_content)
 
     assert len(layout_res) == 13

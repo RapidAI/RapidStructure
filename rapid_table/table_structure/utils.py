@@ -72,7 +72,6 @@ class ONNXRuntimeError(Exception):
 
 
 class TableLabelDecode():
-    """  """
     def __init__(self,
                  dict_character,
                  merge_no_span_structure=True,
@@ -176,7 +175,7 @@ class TableLabelDecode():
         return result
 
     def _bbox_decode(self, bbox, shape):
-        h, w, ratio_h, ratio_w, pad_h, pad_w = shape
+        h, w = shape[:2]
         bbox[0::2] *= w
         bbox[1::2] *= h
         return bbox
@@ -199,7 +198,6 @@ class TableLabelDecode():
     def add_special_char(self, dict_character):
         self.beg_str = "sos"
         self.end_str = "eos"
-        dict_character = dict_character
         dict_character = [self.beg_str] + dict_character + [self.end_str]
         return dict_character
 
@@ -262,8 +260,7 @@ class TablePreprocess():
 
 
 class ResizeTableImage():
-    def __init__(self, max_len, resize_bboxes=False, infer_mode=False,
-                **kwargs):
+    def __init__(self, max_len, resize_bboxes=False, infer_mode=False):
         super(ResizeTableImage, self).__init__()
         self.max_len = max_len
         self.resize_bboxes = resize_bboxes

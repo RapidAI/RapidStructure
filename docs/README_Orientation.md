@@ -20,17 +20,17 @@
         $ pip install rapid-orientation
         ```
 2. python脚本运行
-   ```python
-   import cv2
-   from rapid_orientation import RapidOrientation
+    ```python
+    import cv2
+    from rapid_orientation import RapidOrientation
 
-   orientation_engine = RapidOrientation()
+    orientation_engine = RapidOrientation()
 
-   img = cv2.imread('test_images/layout.png')
+    img = cv2.imread('test_images/layout.png')
 
-   orientation_res, elapse = orientation_engine(img)
-   print(orientation_res)
-   ```
+    orientation_res, elapse = orientation_engine(img)
+    print(orientation_res)
+    ```
 
 3. 终端运行
    - 用法:
