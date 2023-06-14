@@ -41,7 +41,7 @@ setuptools.setup(
     license='Apache-2.0',
     include_package_data=True,
     install_requires=["onnxruntime>=1.7.0", "PyYAML>=6.0",
-                      "opencv_python>=4.5.1.48", "numpy>=1.21.6"],
+                      "opencv_python>=4.5.1.48", "numpy>=1.21.6", 'Pillow'],
     packages=[MODULE_NAME, f'{MODULE_NAME}.models'],
     package_data={'': ['layout_cdla.onnx', '*.yaml']},
     keywords=[

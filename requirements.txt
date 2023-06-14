@@ -7,3 +7,4 @@ pip>=22.3.1
 onnxruntime
 wheel
 get_pypi_latest_version
+Pillow
