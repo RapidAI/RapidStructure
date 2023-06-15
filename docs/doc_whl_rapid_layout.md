@@ -6,6 +6,7 @@
     <a href="https://pepy.tech/project/rapid-layout"><img src="https://static.pepy.tech/personalized-badge/rapid-layout?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 </p>
 
+
 ### 1. Install package by pypi.
 ```bash
 $ pip install rapid-layout
