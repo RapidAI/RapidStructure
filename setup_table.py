@@ -64,7 +64,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.6,<=3.11",
+    python_requires=">=3.6,<3.12",
     entry_points={
         "console_scripts": [f"{MODULE_NAME}={MODULE_NAME}.{MODULE_NAME}:main"]
     },

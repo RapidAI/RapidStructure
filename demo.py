@@ -56,7 +56,7 @@ def vis_table(table_res):
 def demo_layout():
     layout_engine = RapidLayout()
 
-    img = cv2.imread("test_images/layout.png")
+    img = cv2.imread("tests/test_files/layout.png")
 
     layout_res, _ = layout_engine(img)
 
@@ -66,7 +66,7 @@ def demo_layout():
 
 def demo_table():
     table_engine = RapidTable()
-    img = cv2.imread("test_images/table.jpg")
+    img = cv2.imread("tests/test_files/table.jpg")
     table_html_str, _ = table_engine(img)
 
     vis_table(table_html_str)
@@ -81,6 +81,6 @@ def demo_orientation():
 
 
 if __name__ == "__main__":
-    demo_layout()
-    # demo_table()
+    # demo_layout()
+    demo_table()
     # demo_orientation()

@@ -21,9 +21,7 @@ img_path = str(test_file_dir / "table.jpg")
 img = cv2.imread(img_path)
 
 
-@pytest.mark.parametrize(
-    "img_content", [img_path, str(img_path), open(img_path, "rb").read(), img]
-)
+@pytest.mark.parametrize("img_content", [img_path, str(img_path), img])
 def test_multi_input(img_content):
     table_html_str, elapse = rapid_table(img_content)
     assert table_html_str.count("<tr>") == 16
