@@ -26,25 +26,29 @@ def deal_isolate_span(thead_part):
     :return:
     """
     # 1. find out isolate span tokens.
-    isolate_pattern = "<td></td> rowspan=\"(\d)+\" colspan=\"(\d)+\"></b></td>|" \
-                      "<td></td> colspan=\"(\d)+\" rowspan=\"(\d)+\"></b></td>|" \
-                      "<td></td> rowspan=\"(\d)+\"></b></td>|" \
-                      "<td></td> colspan=\"(\d)+\"></b></td>"
+    isolate_pattern = (
+        '<td></td> rowspan="(\d)+" colspan="(\d)+"></b></td>|'
+        '<td></td> colspan="(\d)+" rowspan="(\d)+"></b></td>|'
+        '<td></td> rowspan="(\d)+"></b></td>|'
+        '<td></td> colspan="(\d)+"></b></td>'
+    )
     isolate_iter = re.finditer(isolate_pattern, thead_part)
     isolate_list = [i.group() for i in isolate_iter]
 
     # 2. find out span number, by step 1 results.
-    span_pattern = " rowspan=\"(\d)+\" colspan=\"(\d)+\"|" \
-                   " colspan=\"(\d)+\" rowspan=\"(\d)+\"|" \
-                   " rowspan=\"(\d)+\"|" \
-                   " colspan=\"(\d)+\""
+    span_pattern = (
+        ' rowspan="(\d)+" colspan="(\d)+"|'
+        ' colspan="(\d)+" rowspan="(\d)+"|'
+        ' rowspan="(\d)+"|'
+        ' colspan="(\d)+"'
+    )
     corrected_list = []
     for isolate_item in isolate_list:
         span_part = re.search(span_pattern, isolate_item)
         spanStr_in_isolateItem = span_part.group()
         # 3. merge the span number into the span token format string.
         if spanStr_in_isolateItem is not None:
-            corrected_item = '<td{}></td>'.format(spanStr_in_isolateItem)
+            corrected_item = "<td{}></td>".format(spanStr_in_isolateItem)
             corrected_list.append(corrected_item)
         else:
             corrected_list.append(None)
@@ -66,24 +70,25 @@ def deal_duplicate_bb(thead_part):
     :return:
     """
     # 1. find out <td></td> in <thead></thead>.
-    td_pattern = "<td rowspan=\"(\d)+\" colspan=\"(\d)+\">(.+?)</td>|" \
-                 "<td colspan=\"(\d)+\" rowspan=\"(\d)+\">(.+?)</td>|" \
-                 "<td rowspan=\"(\d)+\">(.+?)</td>|" \
-                 "<td colspan=\"(\d)+\">(.+?)</td>|" \
-                 "<td>(.*?)</td>"
+    td_pattern = (
+        '<td rowspan="(\d)+" colspan="(\d)+">(.+?)</td>|'
+        '<td colspan="(\d)+" rowspan="(\d)+">(.+?)</td>|'
+        '<td rowspan="(\d)+">(.+?)</td>|'
+        '<td colspan="(\d)+">(.+?)</td>|'
+        "<td>(.*?)</td>"
+    )
     td_iter = re.finditer(td_pattern, thead_part)
     td_list = [t.group() for t in td_iter]
 
     # 2. is multiply <b></b> in <td></td> or not?
     new_td_list = []
     for td_item in td_list:
-        if td_item.count('<b>') > 1 or td_item.count('</b>') > 1:
+        if td_item.count("<b>") > 1 or td_item.count("</b>") > 1:
             # multiply <b></b> in <td></td> case.
             # 1. remove all <b></b>
-            td_item = td_item.replace('<b>', '').replace('</b>', '')
+            td_item = td_item.replace("<b>", "").replace("</b>", "")
             # 2. replace <tb> -> <tb><b>, </tb> -> </b></tb>.
-            td_item = td_item.replace('<td>', '<td><b>').replace('</td>',
-                                                                 '</b></td>')
+            td_item = td_item.replace("<td>", "<td><b>").replace("</td>", "</b></td>")
             new_td_list.append(td_item)
         else:
             new_td_list.append(td_item)
@@ -102,14 +107,14 @@ def deal_bb(result_token):
     :return:
     """
     # find out <thead></thead> parts.
-    thead_pattern = '<thead>(.*?)</thead>'
+    thead_pattern = "<thead>(.*?)</thead>"
     if re.search(thead_pattern, result_token) is None:
         return result_token
     thead_part = re.search(thead_pattern, result_token).group()
     origin_thead_part = copy.deepcopy(thead_part)
 
     # check "rowspan" or "colspan" occur in <thead></thead> parts or not .
-    span_pattern = "<td rowspan=\"(\d)+\" colspan=\"(\d)+\">|<td colspan=\"(\d)+\" rowspan=\"(\d)+\">|<td rowspan=\"(\d)+\">|<td colspan=\"(\d)+\">"
+    span_pattern = '<td rowspan="(\d)+" colspan="(\d)+">|<td colspan="(\d)+" rowspan="(\d)+">|<td rowspan="(\d)+">|<td colspan="(\d)+">'
     span_iter = re.finditer(span_pattern, thead_part)
     span_list = [s.group() for s in span_iter]
     has_span_in_head = True if len(span_list) > 0 else False
@@ -119,10 +124,12 @@ def deal_bb(result_token):
         # 1. replace <td> to <td><b>, and </td> to </b></td>
         # 2. it is possible to predict text include <b> or </b> by Text-line recognition,
         #    so we replace <b><b> to <b>, and </b></b> to </b>
-        thead_part = thead_part.replace('<td>', '<td><b>')\
-            .replace('</td>', '</b></td>')\
-            .replace('<b><b>', '<b>')\
-            .replace('</b></b>', '</b>')
+        thead_part = (
+            thead_part.replace("<td>", "<td><b>")
+            .replace("</td>", "</b></td>")
+            .replace("<b><b>", "<b>")
+            .replace("</b></b>", "</b>")
+        )
     else:
         # <thead></thead> include "rowspan" or "colspan" branch 2.
         # Firstly, we deal rowspan or colspan cases.
@@ -136,12 +143,12 @@ def deal_bb(result_token):
         # replace ">" to "<b>"
         replaced_span_list = []
         for sp in span_list:
-            replaced_span_list.append(sp.replace('>', '><b>'))
+            replaced_span_list.append(sp.replace(">", "><b>"))
         for sp, rsp in zip(span_list, replaced_span_list):
             thead_part = thead_part.replace(sp, rsp)
 
         # replace "</td>" to "</b></td>"
-        thead_part = thead_part.replace('</td>', '</b></td>')
+        thead_part = thead_part.replace("</td>", "</b></td>")
 
         # remove duplicated <b> by re.sub
         mb_pattern = "(<b>)+"
@@ -153,12 +160,11 @@ def deal_bb(result_token):
         thead_part = re.sub(mgb_pattern, single_gb_string, thead_part)
 
         # ordinary cases like branch 1
-        thead_part = thead_part.replace('<td>', '<td><b>').replace('<b><b>',
-                                                                   '<b>')
+        thead_part = thead_part.replace("<td>", "<td><b>").replace("<b><b>", "<b>")
 
     # convert <tb><b></b></tb> back to <tb></tb>, empty cell has no <b></b>.
     # but space cell(<tb> </tb>)  is suitable for <td><b> </b></td>
-    thead_part = thead_part.replace('<td><b></b></td>', '<td></td>')
+    thead_part = thead_part.replace("<td><b></b></td>", "<td></td>")
     # deal with duplicated <b></b>
     thead_part = deal_duplicate_bb(thead_part)
     # deal with isolate span tokens, which causes by wrong predict by structure prediction.
@@ -188,20 +194,19 @@ def deal_eb_token(master_token):
     :param master_token:
     :return:
     """
-    master_token = master_token.replace('<eb></eb>', '<td></td>')
-    master_token = master_token.replace('<eb1></eb1>', '<td> </td>')
-    master_token = master_token.replace('<eb2></eb2>', '<td><b> </b></td>')
-    master_token = master_token.replace('<eb3></eb3>', '<td>\u2028\u2028</td>')
-    master_token = master_token.replace('<eb4></eb4>', '<td><sup> </sup></td>')
-    master_token = master_token.replace('<eb5></eb5>', '<td><b></b></td>')
-    master_token = master_token.replace('<eb6></eb6>', '<td><i> </i></td>')
-    master_token = master_token.replace('<eb7></eb7>',
-                                        '<td><b><i></i></b></td>')
-    master_token = master_token.replace('<eb8></eb8>',
-                                        '<td><b><i> </i></b></td>')
-    master_token = master_token.replace('<eb9></eb9>', '<td><i></i></td>')
-    master_token = master_token.replace('<eb10></eb10>',
-                                        '<td><b> \u2028 \u2028 </b></td>')
+    master_token = master_token.replace("<eb></eb>", "<td></td>")
+    master_token = master_token.replace("<eb1></eb1>", "<td> </td>")
+    master_token = master_token.replace("<eb2></eb2>", "<td><b> </b></td>")
+    master_token = master_token.replace("<eb3></eb3>", "<td>\u2028\u2028</td>")
+    master_token = master_token.replace("<eb4></eb4>", "<td><sup> </sup></td>")
+    master_token = master_token.replace("<eb5></eb5>", "<td><b></b></td>")
+    master_token = master_token.replace("<eb6></eb6>", "<td><i> </i></td>")
+    master_token = master_token.replace("<eb7></eb7>", "<td><b><i></i></b></td>")
+    master_token = master_token.replace("<eb8></eb8>", "<td><b><i> </i></b></td>")
+    master_token = master_token.replace("<eb9></eb9>", "<td><i></i></td>")
+    master_token = master_token.replace(
+        "<eb10></eb10>", "<td><b> \u2028 \u2028 </b></td>"
+    )
     return master_token
 
 

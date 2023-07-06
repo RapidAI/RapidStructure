@@ -12,14 +12,17 @@ from PIL import Image, UnidentifiedImageError
 InputType = Union[str, np.ndarray, bytes, Path]
 
 
-class LoadImage():
-    def __init__(self, ):
+class LoadImage:
+    def __init__(
+        self,
+    ):
         pass
 
     def __call__(self, img: InputType) -> np.ndarray:
         if not isinstance(img, InputType.__args__):
             raise LoadImageError(
-                f'The img type {type(img)} does not in {InputType.__args__}')
+                f"The img type {type(img)} does not in {InputType.__args__}"
+            )
 
         img = self.load_img(img)
 
@@ -38,8 +41,7 @@ class LoadImage():
                 img = np.array(Image.open(img))
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             except UnidentifiedImageError as e:
-                raise LoadImageError(
-                    f'cannot identify image file {img}') from e
+                raise LoadImageError(f"cannot identify image file {img}") from e
             return img
 
         if isinstance(img, bytes):
@@ -50,12 +52,11 @@ class LoadImage():
         if isinstance(img, np.ndarray):
             return img
 
-        raise LoadImageError(f'{type(img)} is not supported!')
+        raise LoadImageError(f"{type(img)} is not supported!")
 
     @staticmethod
     def cvt_four_to_three(img: np.ndarray) -> np.ndarray:
-        '''RGBA → RGB
-        '''
+        """RGBA → RGB"""
         r, g, b, a = cv2.split(img)
         new_img = cv2.merge((b, g, r))
 
@@ -69,7 +70,7 @@ class LoadImage():
     @staticmethod
     def verify_exist(file_path: Union[str, Path]):
         if not Path(file_path).exists():
-            raise LoadImageError(f'{file_path} does not exist.')
+            raise LoadImageError(f"{file_path} does not exist.")
 
 
 class LoadImageError(Exception):
@@ -77,12 +78,12 @@ class LoadImageError(Exception):
 
 
 def vis_table(table_res: str, save_path: str) -> None:
-    style_res = '''<style>td {border-left: 1px solid;border-bottom:1px solid;}
+    style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
                    table, th {border-top:1px solid;font-size: 10px;
                    border-collapse: collapse;border-right: 1px solid;}
-                </style>'''
-    prefix_table, suffix_table = table_res.split('<body>')
-    new_table_res = f'{prefix_table}{style_res}<body>{suffix_table}'
-    with open(save_path, 'w', encoding='utf-8') as f:
+                </style>"""
+    prefix_table, suffix_table = table_res.split("<body>")
+    new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
+    with open(save_path, "w", encoding="utf-8") as f:
         f.write(new_table_res)
-    print(f'The infer result has saved in {save_path}')
+    print(f"The infer result has saved in {save_path}")

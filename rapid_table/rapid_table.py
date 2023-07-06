@@ -18,12 +18,14 @@ from .utils import LoadImage, vis_table
 root_dir = Path(__file__).resolve().parent
 
 
-class RapidTable():
+class RapidTable:
     def __init__(self, model_path: str = None):
         self.ocr_sys = RapidOCR()
 
         if model_path is None:
-            model_path = str(root_dir / 'models' / 'en_ppstructure_mobile_v2_SLANet.onnx')
+            model_path = str(
+                root_dir / "models" / "en_ppstructure_mobile_v2_SLANet.onnx"
+            )
 
         self.table_structure = TableStructurer(model_path)
         self.table_matcher = TableMatch()
@@ -64,13 +66,22 @@ class RapidTable():
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--vis', action='store_true',
-                        help='Wheter to visualize the layout results.')
-    parser.add_argument('-img', '--img_path', type=str, required=True,
-                        help='Path to image for layout.')
-    parser.add_argument('-m', '--model_path', type=str,
-                        default=str(root_dir / 'models' / 'en_ppstructure_mobile_v2_SLANet.onnx'),
-                        help='The model path used for inference.')
+    parser.add_argument(
+        "-v",
+        "--vis",
+        action="store_true",
+        help="Wheter to visualize the layout results.",
+    )
+    parser.add_argument(
+        "-img", "--img_path", type=str, required=True, help="Path to image for layout."
+    )
+    parser.add_argument(
+        "-m",
+        "--model_path",
+        type=str,
+        default=str(root_dir / "models" / "en_ppstructure_mobile_v2_SLANet.onnx"),
+        help="The model path used for inference.",
+    )
     args = parser.parse_args()
 
     rapid_table = RapidTable(args.model_path)
@@ -81,9 +92,9 @@ def main() -> None:
 
     if args.vis:
         img_path = Path(args.img_path)
-        save_path = img_path.resolve().parent / f'vis_{img_path.stem}.html'
+        save_path = img_path.resolve().parent / f"vis_{img_path.stem}.html"
         vis_table(table_html_str, str(save_path))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

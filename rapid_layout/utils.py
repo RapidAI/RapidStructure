@@ -10,53 +10,69 @@ from typing import Union
 import cv2
 import numpy as np
 import yaml
-from onnxruntime import (GraphOptimizationLevel, InferenceSession,
-                         SessionOptions, get_available_providers, get_device)
+from onnxruntime import (
+    GraphOptimizationLevel,
+    InferenceSession,
+    SessionOptions,
+    get_available_providers,
+    get_device,
+)
 from PIL import Image, UnidentifiedImageError
 
 InputType = Union[str, np.ndarray, bytes, Path]
 
 
-class OrtInferSession():
+class OrtInferSession:
     def __init__(self, config):
         sess_opt = SessionOptions()
         sess_opt.log_severity_level = 4
         sess_opt.enable_cpu_mem_arena = False
         sess_opt.graph_optimization_level = GraphOptimizationLevel.ORT_ENABLE_ALL
 
-        cuda_ep = 'CUDAExecutionProvider'
-        cpu_ep = 'CPUExecutionProvider'
-        cpu_provider_options = {"arena_extend_strategy": "kSameAsRequested",}
+        cuda_ep = "CUDAExecutionProvider"
+        cpu_ep = "CPUExecutionProvider"
+        cpu_provider_options = {
+            "arena_extend_strategy": "kSameAsRequested",
+        }
 
         EP_list = []
-        if config['use_cuda'] and get_device() == 'GPU' \
-                and cuda_ep in get_available_providers():
+        if (
+            config["use_cuda"]
+            and get_device() == "GPU"
+            and cuda_ep in get_available_providers()
+        ):
             EP_list = [(cuda_ep, config[cuda_ep])]
         EP_list.append((cpu_ep, cpu_provider_options))
 
-        self._verify_model(config['model_path'])
-        self.session = InferenceSession(config['model_path'],
-                                        sess_options=sess_opt,
-                                        providers=EP_list)
+        self._verify_model(config["model_path"])
+        self.session = InferenceSession(
+            config["model_path"], sess_options=sess_opt, providers=EP_list
+        )
 
-        if config['use_cuda'] and cuda_ep not in self.session.get_providers():
-            warnings.warn(f'{cuda_ep} is not avaiable for current env, the inference part is automatically shifted to be executed under {cpu_ep}.\n'
-                          'Please ensure the installed onnxruntime-gpu version matches your cuda and cudnn version, '
-                          'you can check their relations from the offical web site: '
-                          'https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html',
-                          RuntimeWarning)
+        if config["use_cuda"] and cuda_ep not in self.session.get_providers():
+            warnings.warn(
+                f"{cuda_ep} is not avaiable for current env, the inference part is automatically shifted to be executed under {cpu_ep}.\n"
+                "Please ensure the installed onnxruntime-gpu version matches your cuda and cudnn version, "
+                "you can check their relations from the offical web site: "
+                "https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html",
+                RuntimeWarning,
+            )
 
     def __call__(self, input_content: np.ndarray) -> np.ndarray:
         input_dict = dict(zip(self.get_input_names(), [input_content]))
         try:
             return self.session.run(self.get_output_names(), input_dict)
         except Exception as e:
-            raise ONNXRuntimeError('ONNXRuntime inferece failed.') from e
+            raise ONNXRuntimeError("ONNXRuntime inferece failed.") from e
 
-    def get_input_names(self, ):
+    def get_input_names(
+        self,
+    ):
         return [v.name for v in self.session.get_inputs()]
 
-    def get_output_names(self,):
+    def get_output_names(
+        self,
+    ):
         return [v.name for v in self.session.get_outputs()]
 
     def get_metadata(self):
@@ -67,23 +83,26 @@ class OrtInferSession():
     def _verify_model(model_path):
         model_path = Path(model_path)
         if not model_path.exists():
-            raise FileNotFoundError(f'{model_path} does not exists.')
+            raise FileNotFoundError(f"{model_path} does not exists.")
         if not model_path.is_file():
-            raise FileExistsError(f'{model_path} is not a file.')
+            raise FileExistsError(f"{model_path} is not a file.")
 
 
 class ONNXRuntimeError(Exception):
     pass
 
 
-class LoadImage():
-    def __init__(self, ):
+class LoadImage:
+    def __init__(
+        self,
+    ):
         pass
 
     def __call__(self, img: InputType) -> np.ndarray:
         if not isinstance(img, InputType.__args__):
             raise LoadImageError(
-                f'The img type {type(img)} does not in {InputType.__args__}')
+                f"The img type {type(img)} does not in {InputType.__args__}"
+            )
 
         img = self.load_img(img)
 
@@ -102,8 +121,7 @@ class LoadImage():
                 img = np.array(Image.open(img))
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             except UnidentifiedImageError as e:
-                raise LoadImageError(
-                    f'cannot identify image file {img}') from e
+                raise LoadImageError(f"cannot identify image file {img}") from e
             return img
 
         if isinstance(img, bytes):
@@ -114,12 +132,11 @@ class LoadImage():
         if isinstance(img, np.ndarray):
             return img
 
-        raise LoadImageError(f'{type(img)} is not supported!')
+        raise LoadImageError(f"{type(img)} is not supported!")
 
     @staticmethod
     def cvt_four_to_three(img: np.ndarray) -> np.ndarray:
-        '''RGBA → RGB
-        '''
+        """RGBA → RGB"""
         r, g, b, a = cv2.split(img)
         new_img = cv2.merge((b, g, r))
 
@@ -133,7 +150,7 @@ class LoadImage():
     @staticmethod
     def verify_exist(file_path: Union[str, Path]):
         if not Path(file_path).exists():
-            raise LoadImageError(f'{file_path} does not exist.')
+            raise LoadImageError(f"{file_path} does not exist.")
 
 
 class LoadImageError(Exception):
@@ -141,7 +158,7 @@ class LoadImageError(Exception):
 
 
 def transform(data, ops=None):
-    """ transform """
+    """transform"""
     if ops is None:
         ops = []
 
@@ -162,7 +179,7 @@ def create_operators(op_param_dict):
     return ops
 
 
-class Resize():
+class Resize:
     def __init__(self, size=(640, 640)):
         self.size = size
 
@@ -175,25 +192,25 @@ class Resize():
         return img, [ratio_h, ratio_w]
 
     def __call__(self, data):
-        img = data['image']
-        if 'polys' in data:
-            text_polys = data['polys']
+        img = data["image"]
+        if "polys" in data:
+            text_polys = data["polys"]
 
         img_resize, [ratio_h, ratio_w] = self.resize_image(img)
-        if 'polys' in data:
+        if "polys" in data:
             new_boxes = []
             for box in text_polys:
                 new_box = []
                 for cord in box:
                     new_box.append([cord[0] * ratio_w, cord[1] * ratio_h])
                 new_boxes.append(new_box)
-            data['polys'] = np.array(new_boxes, dtype=np.float32)
-        data['image'] = img_resize
+            data["polys"] = np.array(new_boxes, dtype=np.float32)
+        data["image"] = img_resize
         return data
 
 
-class NormalizeImage():
-    def __init__(self, scale=None, mean=None, std=None, order='chw'):
+class NormalizeImage:
+    def __init__(self, scale=None, mean=None, std=None, order="chw"):
         if isinstance(scale, str):
             scale = eval(scale)
 
@@ -201,30 +218,28 @@ class NormalizeImage():
         mean = mean if mean is not None else [0.485, 0.456, 0.406]
         std = std if std is not None else [0.229, 0.224, 0.225]
 
-        shape = (3, 1, 1) if order == 'chw' else (1, 1, 3)
-        self.mean = np.array(mean).reshape(shape).astype('float32')
-        self.std = np.array(std).reshape(shape).astype('float32')
+        shape = (3, 1, 1) if order == "chw" else (1, 1, 3)
+        self.mean = np.array(mean).reshape(shape).astype("float32")
+        self.std = np.array(std).reshape(shape).astype("float32")
 
     def __call__(self, data):
-        img = np.array(data['image'])
-        assert isinstance(img,
-                          np.ndarray), "invalid input 'img' in NormalizeImage"
-        data['image'] = (
-            img.astype('float32') * self.scale - self.mean) / self.std
+        img = np.array(data["image"])
+        assert isinstance(img, np.ndarray), "invalid input 'img' in NormalizeImage"
+        data["image"] = (img.astype("float32") * self.scale - self.mean) / self.std
         return data
 
 
-class ToCHWImage():
+class ToCHWImage:
     def __init__(self, **kwargs):
         pass
 
     def __call__(self, data):
-        img = np.array(data['image'])
-        data['image'] = img.transpose((2, 0, 1))
+        img = np.array(data["image"])
+        data["image"] = img.transpose((2, 0, 1))
         return data
 
 
-class KeepKeys():
+class KeepKeys:
     def __init__(self, keep_keys):
         self.keep_keys = keep_keys
 
@@ -236,19 +251,21 @@ class KeepKeys():
 
 
 def read_yaml(yaml_path):
-    with open(yaml_path, 'rb') as f:
+    with open(yaml_path, "rb") as f:
         data = yaml.load(f, Loader=yaml.Loader)
     return data
 
 
-class PicoDetPostProcess():
-    def __init__(self,
-                 labels,
-                 strides=[8, 16, 32, 64],
-                 score_threshold=0.4,
-                 nms_threshold=0.5,
-                 nms_top_k=1000,
-                 keep_top_k=100):
+class PicoDetPostProcess:
+    def __init__(
+        self,
+        labels,
+        strides=[8, 16, 32, 64],
+        score_threshold=0.4,
+        nms_threshold=0.5,
+        nms_top_k=1000,
+        keep_top_k=100,
+    ):
         self.labels = labels
         self.strides = strides
         self.score_threshold = score_threshold
@@ -257,7 +274,7 @@ class PicoDetPostProcess():
         self.keep_top_k = keep_top_k
 
     def __call__(self, ori_img, img, preds):
-        scores, raw_boxes = preds['boxes'], preds['boxes_num']
+        scores, raw_boxes = preds["boxes"], preds["boxes_num"]
         batch_size = raw_boxes[0].shape[0]
         reg_max = int(raw_boxes[0].shape[-1] / 4 - 1)
         out_boxes_num = []
@@ -269,8 +286,7 @@ class PicoDetPostProcess():
             # generate centers
             decode_boxes = []
             select_scores = []
-            for stride, box_distribute, score in zip(self.strides, raw_boxes,
-                                                     scores):
+            for stride, box_distribute, score in zip(self.strides, raw_boxes, scores):
                 box_distribute = box_distribute[batch_id]
                 score = score[batch_id]
                 # centers
@@ -293,7 +309,7 @@ class PicoDetPostProcess():
 
                 # top K candidate
                 topk_idx = np.argsort(score.max(axis=1))[::-1]
-                topk_idx = topk_idx[:self.nms_top_k]
+                topk_idx = topk_idx[: self.nms_top_k]
                 center = center[topk_idx]
                 score = score[topk_idx]
                 box_distance = box_distance[topk_idx]
@@ -316,12 +332,12 @@ class PicoDetPostProcess():
                 if probs.shape[0] == 0:
                     continue
                 subset_boxes = bboxes[mask, :]
-                box_probs = np.concatenate(
-                    [subset_boxes, probs.reshape(-1, 1)], axis=1)
+                box_probs = np.concatenate([subset_boxes, probs.reshape(-1, 1)], axis=1)
                 box_probs = self.hard_nms(
                     box_probs,
                     iou_threshold=self.nms_threshold,
-                    top_k=self.keep_top_k, )
+                    top_k=self.keep_top_k,
+                )
                 picked_box_probs.append(box_probs)
                 picked_labels.extend([class_index] * box_probs.shape[0])
 
@@ -334,22 +350,23 @@ class PicoDetPostProcess():
 
                 # resize output boxes
                 picked_box_probs[:, :4] = self.warp_boxes(
-                    picked_box_probs[:, :4], ori_shape[batch_id])
-                im_scale = np.concatenate([
-                    scale_factor[batch_id][::-1], scale_factor[batch_id][::-1]
-                ])
+                    picked_box_probs[:, :4], ori_shape[batch_id]
+                )
+                im_scale = np.concatenate(
+                    [scale_factor[batch_id][::-1], scale_factor[batch_id][::-1]]
+                )
                 picked_box_probs[:, :4] /= im_scale
                 # clas score box
                 out_boxes_list.append(
                     np.concatenate(
                         [
-                            np.expand_dims(
-                                np.array(picked_labels),
-                                axis=-1), np.expand_dims(
-                                    picked_box_probs[:, 4], axis=-1),
-                            picked_box_probs[:, :4]
+                            np.expand_dims(np.array(picked_labels), axis=-1),
+                            np.expand_dims(picked_box_probs[:, 4], axis=-1),
+                            picked_box_probs[:, :4],
                         ],
-                        axis=1))
+                        axis=1,
+                    )
+                )
                 out_boxes_num.append(len(picked_labels))
 
         out_boxes_list = np.concatenate(out_boxes_list, axis=0)
@@ -358,32 +375,33 @@ class PicoDetPostProcess():
         for dt in out_boxes_list:
             clsid, bbox, score = int(dt[0]), dt[2:], dt[1]
             label = self.labels[clsid]
-            result = {'bbox': bbox, 'label': label}
+            result = {"bbox": bbox, "label": label}
             results.append(result)
         return results
 
     def load_layout_dict(self, layout_dict_path):
-        with open(layout_dict_path, 'r', encoding='utf-8') as fp:
+        with open(layout_dict_path, "r", encoding="utf-8") as fp:
             labels = fp.readlines()
-        return [label.strip('\n') for label in labels]
+        return [label.strip("\n") for label in labels]
 
     def warp_boxes(self, boxes, ori_shape):
-        """Apply transform to boxes
-        """
+        """Apply transform to boxes"""
         width, height = ori_shape[1], ori_shape[0]
         n = len(boxes)
         if n:
             # warp points
             xy = np.ones((n * 4, 3))
             xy[:, :2] = boxes[:, [0, 1, 2, 3, 0, 3, 2, 1]].reshape(
-                n * 4, 2)  # x1y1, x2y2, x1y2, x2y1
+                n * 4, 2
+            )  # x1y1, x2y2, x1y2, x2y1
             # xy = xy @ M.T  # transform
             xy = (xy[:, :2] / xy[:, 2:3]).reshape(n, 8)  # rescale
             # create new boxes
             x = xy[:, [0, 2, 4, 6]]
             y = xy[:, [1, 3, 5, 7]]
-            xy = np.concatenate(
-                (x.min(1), y.min(1), x.max(1), y.max(1))).reshape(4, n).T
+            xy = (
+                np.concatenate((x.min(1), y.min(1), x.max(1), y.max(1))).reshape(4, n).T
+            )
             # clip boxes
             xy[:, [0, 2]] = xy[:, [0, 2]].clip(0, width)
             xy[:, [1, 3]] = xy[:, [1, 3]].clip(0, height)
@@ -399,9 +417,9 @@ class PicoDetPostProcess():
         scale_factor = np.array([im_scale_y, im_scale_x], dtype=np.float32)
         img_shape = np.array(img.shape[2:], dtype=np.float32)
 
-        input_shape = np.array(img).astype('float32').shape[2:]
-        ori_shape = np.array((img_shape, )).astype('float32')
-        scale_factor = np.array((scale_factor, )).astype('float32')
+        input_shape = np.array(img).astype("float32").shape[2:]
+        ori_shape = np.array((img_shape,)).astype("float32")
+        scale_factor = np.array((scale_factor,)).astype("float32")
         return ori_shape, input_shape, scale_factor
 
     @staticmethod
@@ -417,7 +435,7 @@ class PicoDetPostProcess():
             tmp = np.exp(a - a_max)
 
             # suppress warnings about log of zero
-            with np.errstate(divide='ignore'):
+            with np.errstate(divide="ignore"):
                 s = np.sum(tmp, axis=axis, keepdims=keepdims)
                 out = np.log(s)
 
@@ -428,8 +446,7 @@ class PicoDetPostProcess():
 
         return np.exp(x - logsumexp(x, axis=axis, keepdims=True))
 
-    def hard_nms(self, box_scores, iou_threshold, top_k=-1,
-                 candidate_size=200):
+    def hard_nms(self, box_scores, iou_threshold, top_k=-1, candidate_size=200):
         """
         Args:
             box_scores (N, 5): boxes in corner-form and probabilities.
@@ -452,7 +469,10 @@ class PicoDetPostProcess():
             current_box = boxes[current, :]
             indexes = indexes[:-1]
             rest_boxes = boxes[indexes, :]
-            iou = self.iou_of(rest_boxes, np.expand_dims(current_box, axis=0),)
+            iou = self.iou_of(
+                rest_boxes,
+                np.expand_dims(current_box, axis=0),
+            )
             indexes = indexes[iou <= iou_threshold]
 
         return box_scores[picked, :]
@@ -495,8 +515,8 @@ def vis_layout(img: np.ndarray, layout_res: list, save_path: str) -> None:
 
     tmp_img = copy.deepcopy(img)
     for v in layout_res:
-        bbox = np.round(v['bbox']).astype(np.int32)
-        label = v['label']
+        bbox = np.round(v["bbox"]).astype(np.int32)
+        label = v["label"]
 
         start_point = (bbox[0], bbox[1])
         end_point = (bbox[2], bbox[3])
@@ -505,8 +525,9 @@ def vis_layout(img: np.ndarray, layout_res: list, save_path: str) -> None:
 
         (w, h), _ = cv2.getTextSize(label, font, font_scale, font_thickness)
         put_point = start_point[0], start_point[1] + h
-        cv2.putText(tmp_img, label, put_point, font, font_scale,
-                    font_color, font_thickness)
+        cv2.putText(
+            tmp_img, label, put_point, font, font_scale, font_color, font_thickness
+        )
 
     cv2.imwrite(save_path, tmp_img)
-    print(f'The infer result has saved in {save_path}')
+    print(f"The infer result has saved in {save_path}")

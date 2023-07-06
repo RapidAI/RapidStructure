@@ -19,34 +19,39 @@ from typing import Union
 import cv2
 import numpy as np
 
-from .utils import (OrtInferSession, PicoDetPostProcess, create_operators,
-                    read_yaml, transform, vis_layout, LoadImage)
+from .utils import (
+    OrtInferSession,
+    PicoDetPostProcess,
+    create_operators,
+    read_yaml,
+    transform,
+    vis_layout,
+    LoadImage,
+)
 
 root_dir = Path(__file__).resolve().parent
 
 
-class RapidLayout():
-    def __init__(self,
-                 model_path: str = None):
-        config_path = str(root_dir / 'config.yaml')
+class RapidLayout:
+    def __init__(self, model_path: str = None):
+        config_path = str(root_dir / "config.yaml")
         config = read_yaml(config_path)
         if model_path is None:
-            model_path = str(root_dir / 'models' / 'layout_cdla.onnx')
-        config['model_path'] = model_path
+            model_path = str(root_dir / "models" / "layout_cdla.onnx")
+        config["model_path"] = model_path
 
         self.session = OrtInferSession(config)
-        labels = self.session.get_metadata()['character'].splitlines()
+        labels = self.session.get_metadata()["character"].splitlines()
 
-        self.preprocess_op = create_operators(config['pre_process'])
-        self.postprocess_op = PicoDetPostProcess(labels,
-                                                 **config['post_process'])
+        self.preprocess_op = create_operators(config["pre_process"])
+        self.postprocess_op = PicoDetPostProcess(labels, **config["post_process"])
         self.load_img = LoadImage()
 
     def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
         img = self.load_img(img_content)
 
         ori_im = img.copy()
-        data = {'image': img}
+        data = {"image": img}
         data = transform(data, self.preprocess_op)
         img = data[0]
 
@@ -74,13 +79,22 @@ class RapidLayout():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--vis', action='store_true',
-                        help='Wheter to visualize the layout results.')
-    parser.add_argument('-img', '--img_path', type=str, required=True,
-                        help='Path to image for layout.')
-    parser.add_argument('-m', '--model_path', type=str,
-                        default=str(root_dir / 'models' / 'layout_cdla.onnx'),
-                        help='The model path used for inference.')
+    parser.add_argument(
+        "-v",
+        "--vis",
+        action="store_true",
+        help="Wheter to visualize the layout results.",
+    )
+    parser.add_argument(
+        "-img", "--img_path", type=str, required=True, help="Path to image for layout."
+    )
+    parser.add_argument(
+        "-m",
+        "--model_path",
+        type=str,
+        default=str(root_dir / "models" / "layout_cdla.onnx"),
+        help="The model path used for inference.",
+    )
     args = parser.parse_args()
 
     layout_engine = RapidLayout(args.model_path)
@@ -91,9 +105,9 @@ def main():
 
     if args.vis:
         img_path = Path(args.img_path)
-        save_path = img_path.resolve().parent / f'vis_{img_path.name}'
+        save_path = img_path.resolve().parent / f"vis_{img_path.name}"
         vis_layout(img, layout_res, str(save_path))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

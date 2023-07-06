@@ -14,21 +14,16 @@ sys.path.append(str(root_dir))
 
 from rapid_layout import RapidLayout
 
-test_file_dir = cur_dir / 'test_files'
+test_file_dir = cur_dir / "test_files"
 layout_engine = RapidLayout()
 
-img_path = test_file_dir / 'layout.png'
+img_path = test_file_dir / "layout.png"
 
 img = cv2.imread(str(img_path))
 
+
 @pytest.mark.parametrize(
-    'img_content',
-    [
-        img_path,
-        str(img_path),
-        open(img_path, 'rb').read(),
-        img
-    ]
+    "img_content", [img_path, str(img_path), open(img_path, "rb").read(), img]
 )
 def test_multi_input(img_content):
     layout_res, elapse = layout_engine(img_content)

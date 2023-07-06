@@ -28,16 +28,16 @@ from .utils import LoadImage, OrtInferSession, create_operators
 root_dir = Path(__file__).resolve().parent
 
 
-class RapidOrientation():
+class RapidOrientation:
     def __init__(self, model_path: str = None):
-        config_path = str(root_dir / 'config.yaml')
+        config_path = str(root_dir / "config.yaml")
         config = self.read_yaml(config_path)
         if model_path is None:
-            model_path = str(root_dir / 'models' / 'rapid_orientation.onnx')
-        config['model_path'] = model_path
+            model_path = str(root_dir / "models" / "rapid_orientation.onnx")
+        config["model_path"] = model_path
 
         self.session = OrtInferSession(config)
-        self.labels = self.session.get_metadata()['character'].splitlines()
+        self.labels = self.session.get_metadata()["character"].splitlines()
 
         self.preprocess_ops = create_operators(config["PreProcess"])
 
@@ -61,19 +61,23 @@ class RapidOrientation():
 
     @staticmethod
     def read_yaml(yaml_path):
-        with open(yaml_path, 'rb') as f:
+        with open(yaml_path, "rb") as f:
             data = yaml.load(f, Loader=yaml.Loader)
         return data
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-img', '--img_path', type=str, required=True,
-                        help='Path to image for layout.')
-    parser.add_argument('-m', '--model_path', type=str,
-                        default=str(root_dir / 'models' /
-                                    'rapid_orientation.onnx'),
-                        help='The model path used for inference.')
+    parser.add_argument(
+        "-img", "--img_path", type=str, required=True, help="Path to image for layout."
+    )
+    parser.add_argument(
+        "-m",
+        "--model_path",
+        type=str,
+        default=str(root_dir / "models" / "rapid_orientation.onnx"),
+        help="The model path used for inference.",
+    )
     args = parser.parse_args()
 
     orientation_engine = RapidOrientation(args.model_path)
@@ -83,5 +87,5 @@ def main():
     print(orientaion_result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

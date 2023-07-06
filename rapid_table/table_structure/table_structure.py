@@ -14,10 +14,10 @@
 import time
 import numpy as np
 
-from .utils import (OrtInferSession, TableLabelDecode, TablePreprocess)
+from .utils import OrtInferSession, TableLabelDecode, TablePreprocess
 
 
-class TableStructurer():
+class TableStructurer:
     def __init__(self, model_path: str):
         self.preprocess_op = TablePreprocess()
 
@@ -28,7 +28,7 @@ class TableStructurer():
 
     def __call__(self, img):
         starttime = time.time()
-        data = {'image': img}
+        data = {"image": img}
         data = self.preprocess_op(data)
         img = data[0]
         if img is None:
@@ -38,20 +38,19 @@ class TableStructurer():
 
         outputs = self.session(img)
 
-        preds = {
-            'loc_preds': outputs[0],
-            'structure_probs': outputs[1]
-        }
+        preds = {"loc_preds": outputs[0], "structure_probs": outputs[1]}
 
         shape_list = np.expand_dims(data[-1], axis=0)
         post_result = self.postprocess_op(preds, [shape_list])
 
-        bbox_list = post_result['bbox_batch_list'][0]
+        bbox_list = post_result["bbox_batch_list"][0]
 
-        structure_str_list = post_result['structure_batch_list'][0]
+        structure_str_list = post_result["structure_batch_list"][0]
         structure_str_list = structure_str_list[0]
-        structure_str_list = [
-            '<html>', '<body>', '<table>'
-        ] + structure_str_list + ['</table>', '</body>', '</html>']
+        structure_str_list = (
+            ["<html>", "<body>", "<table>"]
+            + structure_str_list
+            + ["</table>", "</body>", "</html>"]
+        )
         elapse = time.time() - starttime
         return (structure_str_list, bbox_list), elapse
