@@ -66,6 +66,8 @@
     </div>
 
 #### 更新日志
+- 2023-07-10 v0.0.13 updata:
+  - 更改传入表格还原中OCR的实例接口，可以传入其他OCR实例，前提要与`rapidocr_onnxruntime`接口一致
 - 2023-07-06 v0.0.12 update:
   - 去掉返回表格的html字符串中的`<thead></thead><tbody></tbody>`元素，便于后续统一。
   - 采用Black工具优化代码

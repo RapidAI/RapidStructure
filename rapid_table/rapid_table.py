@@ -5,7 +5,7 @@ import argparse
 import copy
 import time
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -17,10 +17,16 @@ from .utils import LoadImage, vis_table
 
 root_dir = Path(__file__).resolve().parent
 
+DEFAULT_OCR = RapidOCR()
+
 
 class RapidTable:
-    def __init__(self, model_path: str = None):
-        self.ocr_sys = RapidOCR()
+    def __init__(
+        self, model_path: Optional[str] = None, ocr_instance: Optional[object] = None
+    ):
+        self.ocr_sys = DEFAULT_OCR
+        if ocr_instance:
+            self.ocr_sys = ocr_instance
 
         if model_path is None:
             model_path = str(
