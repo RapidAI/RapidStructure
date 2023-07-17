@@ -4,8 +4,7 @@
 import sys
 from pathlib import Path
 
-import cv2
-import pytest
+from rapidocr_onnxruntime import RapidOCR
 
 cur_dir = Path(__file__).resolve().parent
 root_dir = cur_dir.parent
@@ -14,14 +13,19 @@ sys.path.append(str(root_dir))
 
 from rapid_table import RapidTable
 
-rapid_table = RapidTable()
+ocr_engine = RapidOCR()
+table_engine = RapidTable()
 
 test_file_dir = cur_dir / "test_files"
 img_path = str(test_file_dir / "table.jpg")
-img = cv2.imread(img_path)
 
 
-@pytest.mark.parametrize("img_content", [img_path, str(img_path), img])
-def test_multi_input(img_content):
-    table_html_str, elapse = rapid_table(img_content)
+def test_ocr_input():
+    ocr_res, _ = ocr_engine(img_path)
+    table_html_str, elapse = table_engine(img_path, ocr_res)
+    assert table_html_str.count("<tr>") == 16
+
+
+def test_input_ocr_none():
+    table_html_str, elapse = table_engine(img_path)
     assert table_html_str.count("<tr>") == 16

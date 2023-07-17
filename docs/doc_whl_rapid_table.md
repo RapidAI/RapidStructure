@@ -8,8 +8,10 @@
 
 
 ### 1. Install package by pypi.
+⚠️Attention: After `rapid_table>=v0.1.0`, you need to install `rapidocr_onnxruntime` package firstly.
 ```bash
-$ pip install rapid-table
+pip install rapidocr_onnxruntime
+pip install rapid-table
 ```
 
 ### 2. Run by script.
@@ -17,20 +19,24 @@ $ pip install rapid-table
 - See details, for [README_Table](https://github.com/RapidAI/RapidStructure/blob/main/docs/README_Table.md) .
 - 📌 `table.jpg` source: [link](https://github.com/RapidAI/RapidStructure/blob/main/test_images/table.jpg)
 
-```python
-from rapid_table import RapidTable
+    ````python
+    from rapid_table import RapidTable
+    from rapidocr_onnxruntime import RapidOCR
 
-table_engine = RapidTable()
+    table_engine = RapidTable()
+    ocr_engine = RapidOCR()
 
-with open('table.jpg', 'rb') as f:
-    img = f.read()
-table_html_str, _ = table_engine(img)
-print(table_html_str)
-```
+    img_path = 'test_images/table.jpg'
+
+    ocr_result, _ = ocr_engine(img_path)
+    table_html_str, _ = table_engine(img_path, ocr_result)
+
+    print(table_html_str)
+    ````
 
 ### 3. Run by command line.
 ```bash
-$ rapid_table -v -img table.jpg
+rapid_table -v -img table.jpg
 ```
 
 ### 4. Result.

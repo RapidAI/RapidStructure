@@ -45,7 +45,6 @@ setuptools.setup(
         "PyYAML>=6.0",
         "opencv_python>=4.5.1.48",
         "numpy>=1.21.6",
-        "rapidocr_onnxruntime>=1.1.18",
         "Pillow",
     ],
     packages=[

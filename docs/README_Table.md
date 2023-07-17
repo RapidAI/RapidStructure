@@ -17,23 +17,30 @@
     |   中文   |   `ch_ppstructure_mobile_v2_SLANet.onnx`    |  7.4M   |
 - 模型下载地址为：[百度网盘](https://pan.baidu.com/s/1PI9fksW6F6kQfJhwUkewWg?pwd=p29g) | [Google Drive](https://drive.google.com/drive/folders/1DAPWSN2zGQ-ED_Pz7RaJGTjfkN2-Mvsf?usp=sharing)
 
+
 #### 使用方式
 1. pip安装
-   - 由于模型较小，预先将英文表格识别模型(`en_ppstructure_mobile_v2_SLANet.onnx`)打包进了whl包内，如果做英文表格识别，可直接安装使用
+    - 由于模型较小，预先将英文表格识别模型(`en_ppstructure_mobile_v2_SLANet.onnx`)打包进了whl包内，如果做英文表格识别，可直接安装使用
+    - ⚠️注意：`rapid_table>=v0.1.0`之后，不再将`rapidocr_onnxruntime`依赖强制打包到`rapid_table`中。使用前，需要自行安装`rapidocr_onnxruntime`包。
         ```bash
-        $ pip install rapid-table
+        pip install rapidocr_onnxruntime
+        pip install rapid_table
         ```
 2. python脚本运行
     ````python
-    import cv2
     from rapid_table import RapidTable
+    from rapidocr_onnxruntime import RapidOCR
 
     # RapidTable类提供model_path参数，可以自行指定上述2个模型，默认是en_ppstructure_mobile_v2_SLANet.onnx
     # table_engine = RapidTable(model_path='ch_ppstructure_mobile_v2_SLANet.onnx')
     table_engine = RapidTable()
+    ocr_engine = RapidOCR()
 
-    img = cv2.imread('test_images/table.jpg')
-    table_html_str, _ = table_engine(img)
+    img_path = 'test_images/table.jpg'
+
+    ocr_result, _ = ocr_engine(img_path)
+    table_html_str, _ = table_engine(img_path, ocr_result)
+
     print(table_html_str)
     ````
 3. 终端运行
@@ -66,8 +73,14 @@
     </div>
 
 #### 更新日志
+- 2023-07-17 v0.1.0 update:
+    - 将`rapidocr_onnxruntime`部分从`rapid_table`中解耦合出来，给出选项是否依赖，更加灵活。
+    - 增加接口输入参数`ocr_result`：
+      - 如果在调用函数时，事先指定了`ocr_result`参数值，则不会再走OCR。其中`ocr_result`格式需要和`rapidocr_onnxruntime`返回值一致。
+      - 如果未指定`ocr_result`参数值，但是事先安装了`rapidocr_onnxruntime`库，则会自动调用该库，进行识别。
+      - 如果`ocr_result`未指定，且`rapidocr_onnxruntime`未安装，则会报错。必须满足两个条件中一个。
 - 2023-07-10 v0.0.13 updata:
-  - 更改传入表格还原中OCR的实例接口，可以传入其他OCR实例，前提要与`rapidocr_onnxruntime`接口一致
+    - 更改传入表格还原中OCR的实例接口，可以传入其他OCR实例，前提要与`rapidocr_onnxruntime`接口一致
 - 2023-07-06 v0.0.12 update:
-  - 去掉返回表格的html字符串中的`<thead></thead><tbody></tbody>`元素，便于后续统一。
-  - 采用Black工具优化代码
+    - 去掉返回表格的html字符串中的`<thead></thead><tbody></tbody>`元素，便于后续统一。
+    - 采用Black工具优化代码

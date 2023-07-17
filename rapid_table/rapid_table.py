@@ -3,13 +3,13 @@
 # @Contact: liekkaskono@163.com
 import argparse
 import copy
+import importlib
 import time
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
-from rapidocr_onnxruntime import RapidOCR
 
 from .table_matcher import TableMatch
 from .table_structure import TableStructurer
@@ -17,32 +17,44 @@ from .utils import LoadImage, vis_table
 
 root_dir = Path(__file__).resolve().parent
 
-DEFAULT_OCR = RapidOCR()
-
 
 class RapidTable:
     def __init__(
-        self, model_path: Optional[str] = None, ocr_instance: Optional[object] = None
+        self,
+        model_path: Optional[str] = None,
     ):
-        self.ocr_sys = DEFAULT_OCR
-        if ocr_instance:
-            self.ocr_sys = ocr_instance
-
         if model_path is None:
             model_path = str(
                 root_dir / "models" / "en_ppstructure_mobile_v2_SLANet.onnx"
             )
 
+        self.load_img = LoadImage()
         self.table_structure = TableStructurer(model_path)
         self.table_matcher = TableMatch()
 
-        self.load_img = LoadImage()
+        try:
+            self.ocr_engine = importlib.import_module("rapidocr_onnxruntime").RapidOCR()
+        except ModuleNotFoundError:
+            self.ocr_engine = None
 
-    def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
+    def __call__(
+        self,
+        img_content: Union[str, np.ndarray, bytes, Path],
+        ocr_result: List[Union[List[List[float]], str, str]] = None,
+    ) -> Tuple[str, float]:
+        if self.ocr_engine is None and ocr_result is None:
+            raise ValueError(
+                "One of two conditions must be met: ocr_result is not empty, or rapidocr_onnxruntime is installed."
+            )
+
         img = self.load_img(img_content)
 
         s = time.time()
-        dt_boxes, rec_res = self._ocr(copy.deepcopy(img))
+        h, w = img.shape[:2]
+
+        if ocr_result is None:
+            ocr_result, _ = self.ocr_engine(img)
+        dt_boxes, rec_res = self.get_boxes_recs(ocr_result, h, w)
 
         structure_res, _ = self.table_structure(copy.deepcopy(img))
         pred_html = self.table_matcher(structure_res, dt_boxes, rec_res)
@@ -50,10 +62,9 @@ class RapidTable:
         elapse = time.time() - s
         return pred_html, elapse
 
-    def _ocr(self, img):
-        h, w = img.shape[:2]
-
-        ocr_result, _ = self.ocr_sys(img)
+    def get_boxes_recs(
+        self, ocr_result: List[Union[List[List[float]], str, str]], h: int, w: int
+    ) -> Tuple[np.ndarray, Tuple[str, str]]:
         dt_boxes, rec_res, scores = list(zip(*ocr_result))
         rec_res = list(zip(rec_res, scores))
 
@@ -90,10 +101,19 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    try:
+        ocr_engine = importlib.import_module("rapidocr_onnxruntime").RapidOCR()
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "Please install the rapidocr_onnxruntime by pip install rapidocr_onnxruntime."
+        ) from exc
+
     rapid_table = RapidTable(args.model_path)
 
     img = cv2.imread(args.img_path)
-    table_html_str, elapse = rapid_table(img)
+
+    ocr_result, _ = ocr_engine(img)
+    table_html_str, elapse = rapid_table(img, ocr_result)
     print(table_html_str)
 
     if args.vis:

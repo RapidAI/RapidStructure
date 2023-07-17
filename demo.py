@@ -6,6 +6,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from rapidocr_onnxruntime import RapidOCR
 
 from rapid_layout import RapidLayout
 from rapid_orientation import RapidOrientation
@@ -66,8 +67,11 @@ def demo_layout():
 
 def demo_table():
     table_engine = RapidTable()
-    img = cv2.imread("tests/test_files/table.jpg")
-    table_html_str, _ = table_engine(img)
+    ocr_engine = RapidOCR()
+
+    img_path = "tests/test_files/table.jpg"
+    ocr_result, _ = ocr_engine(img_path)
+    table_html_str, _ = table_engine(img_path, ocr_result)
 
     vis_table(table_html_str)
     print(table_html_str)
