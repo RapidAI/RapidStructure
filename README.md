@@ -21,6 +21,7 @@
 ### 整体流程
 ```mermaid
 flowchart TD
-    A[/文档图像/] --> B(文档方向分类 rapid_orientation) --> C(版面分析 rapid_layout) & D(表格识别 rapid_table) --> E(OCR识别 rapidocr_onnxruntime)
-    E --> F(结构化输出)
+    A[/文档图像/] --> B([文档方向分类 rapid_orientation]) --> C([版面分析 rapid_layout])
+    C --> D([表格识别 rapid_table]) & E([公式识别 rapid_latex_ocr]) & F([文字识别 rapidocr_onnxruntime]) --> G([版面还原])
+    G --> H[/结构化输出/]
 ```
