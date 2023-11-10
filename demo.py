@@ -6,7 +6,6 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from rapidocr_onnxruntime import RapidOCR
 
 from rapid_layout import RapidLayout
 from rapid_orientation import RapidOrientation
@@ -66,6 +65,8 @@ def demo_layout():
 
 
 def demo_table():
+    from rapidocr_onnxruntime import RapidOCR
+
     table_engine = RapidTable()
     ocr_engine = RapidOCR()
 
@@ -85,6 +86,6 @@ def demo_orientation():
 
 
 if __name__ == "__main__":
-    # demo_layout()
-    demo_table()
+    demo_layout()
+    # demo_table()
     # demo_orientation()

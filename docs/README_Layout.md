@@ -11,12 +11,12 @@
 - 具体来说，就是分析给定的文档类别图像（论文截图等），定位其中类别和位置，如标题、段落、表格和图片等各个部分。
 - 目前支持三种类别的版面分析模型：中文、英文和表格版面分析模型，具体可参见下面表格：
 
-    | 模型类型  |        模型名称         | 模型大小 |                           支持种类                           |
-    |:---:|:---:|:---:|:---:|
-    |   表格   |   `layout_table.onnx`   |  7.06M   |                           `table`                            |
-    |   英文   | `layout_publaynet.onnx` |  7.06M   |                `text title list table figure`                |
-    |   中文   |   `layout_cdla.onnx`    |  7.07M   | `text title figure  figure_caption table table_caption` <br> `header footer reference equation` |
-- 模型下载地址为：[百度网盘](https://pan.baidu.com/s/1PI9fksW6F6kQfJhwUkewWg?pwd=p29g) | [Google Drive](https://drive.google.com/drive/folders/1DAPWSN2zGQ-ED_Pz7RaJGTjfkN2-Mvsf?usp=sharing)
+    |                                        模型类型                                        |                                               模型名称                                               | 模型大小 |                                            支持种类                                             |
+    | :------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :------: | :---------------------------------------------------------------------------------------------: |
+    |                                          表格                                          |                                         `layout_table.onnx`                                          |  7.06M   |                                             `table`                                             |
+    |                                          英文                                          |                                       `layout_publaynet.onnx`                                        |  7.06M   |                                 `text title list table figure`                                  |
+    |                                          中文                                          |                                          `layout_cdla.onnx`                                          |  7.07M   | `text title figure  figure_caption table table_caption` <br> `header footer reference equation` |
+    | - 模型下载地址为：[百度网盘](https://pan.baidu.com/s/1PI9fksW6F6kQfJhwUkewWg?pwd=p29g) | [Google Drive](https://drive.google.com/drive/folders/1DAPWSN2zGQ-ED_Pz7RaJGTjfkN2-Mvsf?usp=sharing) |
 
 #### 使用方式
 1. pip安装
@@ -69,5 +69,5 @@
         ```
    - 可视化结果
     <div align="center">
-        <img src="https://warehouse-camo.ingress.cmh1.psfhosted.org/bbf4e9220b4d38ccefad2f86d1d894d6f2e8e98e/68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f526170696441492f52617069644f43522f393437633639353864333066343763376337623031366637646333303866323335616365633365652f707974686f6e2f72617069645f7374727563747572652f746573745f696d616765732f6c61796f75745f726573756c742e6a7067" width="80%" height="80%">
+        <img src="hhttps://github.com/RapidAI/RapidStructure/releases/download/v0.0.0/layout_result.jpg" width="80%" height="80%">
     </div>
