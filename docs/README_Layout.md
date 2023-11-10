@@ -69,5 +69,5 @@
         ```
    - 可视化结果
     <div align="center">
-        <img src="hhttps://github.com/RapidAI/RapidStructure/releases/download/v0.0.0/layout_result.jpg" width="80%" height="80%">
+        <img src="https://github.com/RapidAI/RapidStructure/releases/download/v0.0.0/layout_result.jpg" width="80%" height="80%">
     </div>
