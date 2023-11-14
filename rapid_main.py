@@ -76,40 +76,11 @@ def get_crop_img_list(img, dt_boxes):
 
     return crop_imgs
 
-def get_table(img_path):
-    layout_engine = RapidLayout()
-
-    cur_dir = Path(__file__).resolve().parent
-    test_file_dir = cur_dir / "pic"
-    img_path = test_file_dir / "layout.png"
-
-    img = cv2.imread(str(img_path))
-    # layout_res, elapse = layout_engine(img)
-    layout_res, elapse = layout_engine(img)
-    print(layout_res)
-    dt_boxes = get_boxes(layout_res)
-    img_crop_list = get_crop_img_list(img, dt_boxes)
-    # 打印截取的图像列表
-    # for i, cropped_img in enumerate(img_crop_list):
-    #     cv2.imshow(f"Cropped Image {i + 1}", cropped_img)
-
-    table_engine = RapidTable()
-    ocr_engine = RapidOCR()
-
-    # img_path = "tests/test_files/table.jpg"
-    table_html = []
-    for i, cropped_img in enumerate(img_crop_list):
-        ocr_result, _ = ocr_engine(cropped_img)
-        table_html_str, _ = table_engine(cropped_img, ocr_result)
-        table_html.append(table_html_str)  # i,
-
-    print(table_html)
-
 def test_input():
     layout_engine = RapidLayout()
 
     cur_dir = Path(__file__).resolve().parent
-    test_file_dir = cur_dir / "pic"
+    test_file_dir = cur_dir / "tests" / "test_files"
     img_path = test_file_dir / "layout.png"
 
     img = cv2.imread(str(img_path))
