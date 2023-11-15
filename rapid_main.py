@@ -1,25 +1,15 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-import sys
 from pathlib import Path
-import copy
-import pytest
+
 import cv2
 import numpy as np
-
-from typing import List, Optional, Tuple, Union
-
 from rapidocr_onnxruntime import RapidOCR
+
+from rapid_layout import RapidLayout
 from rapid_table import RapidTable
 
-'''
-cur_dir = Path(__file__).resolve().parent
-root_dir = cur_dir.parent
-
-sys.path.append(str(root_dir))
-'''
-from rapid_layout import RapidLayout
 
 def sorted_boxes(dt_boxes):
     num_boxes = dt_boxes.shape[0]
@@ -30,8 +20,8 @@ def sorted_boxes(dt_boxes):
     for i in range(num_boxes - 1):
         for j in range(i, -1, -1):
             if (
-                    abs(_boxes[j + 1][1] - _boxes[j][1]) < 10
-                    and _boxes[j + 1][0] < _boxes[j][0]
+                abs(_boxes[j + 1][1] - _boxes[j][1]) < 10
+                and _boxes[j + 1][0] < _boxes[j][0]
             ):
                 tmp = _boxes[j]
                 _boxes[j] = _boxes[j + 1]
@@ -53,7 +43,7 @@ def get_boxes(layout_res: list):
 
         # cv2.rectangle(tmp_img, start_point, end_point, (0, 255, 0), 2)
         # box = [bbox[0], bbox[1], bbox[2], bbox[3]]
-        if (label == "table"):
+        if label == "table":
             r_boxes.append(bbox)
 
     # r_boxes = sorted_boxes2(r_boxes)
@@ -75,6 +65,7 @@ def get_crop_img_list(img, dt_boxes):
         crop_imgs.append(cropped_img)
 
     return crop_imgs
+
 
 def test_input():
     layout_engine = RapidLayout()
