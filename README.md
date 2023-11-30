@@ -24,6 +24,7 @@
 ### [文档方向分类](./docs/README_Orientation.md)
 ### [版面分析](./docs/README_Layout.md)
 ### [表格识别](./docs/README_Table.md)
+更多表格识别：[TableStructureRec](https://github.com/RapidAI/TableStructureRec)
 
 ### 整体流程
 ```mermaid
