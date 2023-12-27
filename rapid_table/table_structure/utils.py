@@ -158,14 +158,17 @@ class TableLabelDecode:
                 char_idx = int(structure_idx[batch_idx][idx])
                 if idx > 0 and char_idx == end_idx:
                     break
+
                 if char_idx in ignored_tokens:
                     continue
+
                 structure_list.append(self.character[char_idx])
 
                 bbox = gt_bbox_list[batch_idx][idx]
                 if bbox.sum() != 0:
                     bbox = self._bbox_decode(bbox, shape_list[batch_idx])
                     bbox_list.append(bbox)
+
             structure_batch_list.append(structure_list)
             bbox_batch_list.append(bbox_list)
         result = {
@@ -187,12 +190,12 @@ class TableLabelDecode:
 
     def get_beg_end_flag_idx(self, beg_or_end):
         if beg_or_end == "beg":
-            idx = np.array(self.dict[self.beg_str])
-        elif beg_or_end == "end":
-            idx = np.array(self.dict[self.end_str])
-        else:
-            assert False, "unsupport type %s in get_beg_end_flag_idx" % beg_or_end
-        return idx
+            return np.array(self.dict[self.beg_str])
+
+        if beg_or_end == "end":
+            return np.array(self.dict[self.end_str])
+
+        raise TypeError(f"unsupport type {beg_or_end} in get_beg_end_flag_idx")
 
     def add_special_char(self, dict_character):
         self.beg_str = "sos"

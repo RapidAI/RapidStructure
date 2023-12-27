@@ -3,7 +3,7 @@
 # @Contact: liekkaskono@163.com
 from io import BytesIO
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -77,13 +77,64 @@ class LoadImageError(Exception):
     pass
 
 
-def vis_table(table_res: str, save_path: str) -> None:
-    style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
-                   table, th {border-top:1px solid;font-size: 10px;
-                   border-collapse: collapse;border-right: 1px solid;}
-                </style>"""
-    prefix_table, suffix_table = table_res.split("<body>")
-    new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
-    with open(save_path, "w", encoding="utf-8") as f:
-        f.write(new_table_res)
-    print(f"The infer result has saved in {save_path}")
+class VisTable:
+    def __init__(
+        self,
+    ):
+        self.load_img = LoadImage()
+
+    def __call__(
+        self,
+        img_path: Union[str, Path],
+        save_dir: Union[str, Path],
+        table_html_str: str,
+        table_cell_bboxes: Optional[np.ndarray] = None,
+    ) -> None:
+        save_html_path = save_dir / "table_res.html"
+        save_vis_img = save_dir / "table_res_vis.png"
+        self.export_html(table_html_str=table_html_str, save_path=save_html_path)
+
+        if table_cell_bboxes is None:
+            return
+
+        img = self.load_img(img_path)
+
+        dims_bboxes = table_cell_bboxes.shape[1]
+        if dims_bboxes == 4:
+            drawed_img = self.draw_rectangle(img, table_cell_bboxes)
+        elif dims_bboxes == 8:
+            drawed_img = self.draw_polylines(img, table_cell_bboxes)
+        else:
+            raise ValueError("Shape of table bounding boxes is not between in 4 or 8.")
+
+        self.save_img(save_vis_img, drawed_img)
+
+    def export_html(self, table_html_str: str, save_path: Union[str, Path]):
+        style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
+                    table, th {border-top:1px solid;font-size: 10px;
+                    border-collapse: collapse;border-right: 1px solid;}
+                    </style>"""
+        prefix_table, suffix_table = table_html_str.split("<body>")
+        new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
+        with open(save_path, "w", encoding="utf-8") as f:
+            f.write(new_table_res)
+
+    @staticmethod
+    def draw_rectangle(img: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+        img_copy = img.copy()
+        for box in boxes.astype(int):
+            x1, y1, x2, y2 = box
+            cv2.rectangle(img_copy, (x1, y1), (x2, y2), (255, 0, 0), 2)
+        return img_copy
+
+    @staticmethod
+    def draw_polylines(img: np.ndarray, points) -> np.ndarray:
+        img_copy = img.copy()
+        for point in points.astype(int):
+            point = point.reshape(4, 2)
+            cv2.polylines(img_copy, [point.astype(int)], True, (255, 0, 0), 2)
+        return img_copy
+
+    @staticmethod
+    def save_img(save_path: Union[str, Path], img: np.ndarray):
+        cv2.imwrite(str(save_path), img)

@@ -13,7 +13,7 @@ import numpy as np
 
 from .table_matcher import TableMatch
 from .table_structure import TableStructurer
-from .utils import LoadImage, vis_table
+from .utils import LoadImage, VisTable
 
 root_dir = Path(__file__).resolve().parent
 
@@ -56,11 +56,11 @@ class RapidTable:
             ocr_result, _ = self.ocr_engine(img)
         dt_boxes, rec_res = self.get_boxes_recs(ocr_result, h, w)
 
-        structure_res, _ = self.table_structure(copy.deepcopy(img))
-        pred_html = self.table_matcher(structure_res, dt_boxes, rec_res)
+        pred_structures, pred_bboxes, _ = self.table_structure(copy.deepcopy(img))
+        pred_html = self.table_matcher(pred_structures, pred_bboxes, dt_boxes, rec_res)
 
         elapse = time.time() - s
-        return pred_html, elapse
+        return pred_html, pred_bboxes, elapse
 
     def get_boxes_recs(
         self, ocr_result: List[Union[List[List[float]], str, str]], h: int, w: int
@@ -113,13 +113,14 @@ def main() -> None:
     img = cv2.imread(args.img_path)
 
     ocr_result, _ = ocr_engine(img)
-    table_html_str, elapse = rapid_table(img, ocr_result)
+    table_html_str, table_cell_bboxes, elapse = rapid_table(img, ocr_result)
     print(table_html_str)
 
+    viser = VisTable()
     if args.vis:
         img_path = Path(args.img_path)
-        save_path = img_path.resolve().parent / f"vis_{img_path.stem}.html"
-        vis_table(table_html_str, str(save_path))
+        save_dir = img_path.resolve().parent
+        viser(img_path, save_dir, table_html_str, table_cell_bboxes)
 
 
 if __name__ == "__main__":

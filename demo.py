@@ -9,7 +9,7 @@ import numpy as np
 
 from rapid_layout import RapidLayout
 from rapid_orientation import RapidOrientation
-from rapid_table import RapidTable
+from rapid_table import RapidTable, VisTable
 
 
 def vis_layout(img: np.ndarray, layout_res: list) -> None:
@@ -35,24 +35,6 @@ def vis_layout(img: np.ndarray, layout_res: list) -> None:
     print(f"The infer result has saved in {image_save}")
 
 
-def vis_table(table_res):
-    style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
-                   table, th {border-top:1px solid;font-size: 10px;
-                   border-collapse: collapse;border-right: 1px solid;}
-                </style>"""
-    prefix_table, suffix_table = table_res.split("<body>")
-    new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
-
-    draw_img_save = Path("./inference_results/")
-    if not draw_img_save.exists():
-        draw_img_save.mkdir(parents=True, exist_ok=True)
-
-    html_path = str(draw_img_save / "table_result.html")
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(new_table_res)
-    print(f"The infer result has saved in {html_path}")
-
-
 def demo_layout():
     layout_engine = RapidLayout()
 
@@ -69,12 +51,17 @@ def demo_table():
 
     table_engine = RapidTable()
     ocr_engine = RapidOCR()
+    viser = VisTable()
 
     img_path = "tests/test_files/table.jpg"
     ocr_result, _ = ocr_engine(img_path)
-    table_html_str, _ = table_engine(img_path, ocr_result)
+    table_html_str, table_cell_bboxes, _ = table_engine(img_path, ocr_result)
 
-    vis_table(table_html_str)
+    save_dir = Path("./inference_results/")
+    if not save_dir.exists():
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+    viser(img_path, save_dir, table_html_str, table_cell_bboxes)
     print(table_html_str)
 
 
@@ -86,6 +73,6 @@ def demo_orientation():
 
 
 if __name__ == "__main__":
-    demo_layout()
-    # demo_table()
+    # demo_layout()
+    demo_table()
     # demo_orientation()

@@ -22,8 +22,7 @@ class TableMatch:
         self.filter_ocr_result = filter_ocr_result
         self.use_master = use_master
 
-    def __call__(self, structure_res, dt_boxes, rec_res):
-        pred_structures, pred_bboxes = structure_res
+    def __call__(self, pred_structures, pred_bboxes, dt_boxes, rec_res):
         if self.filter_ocr_result:
             dt_boxes, rec_res = self._filter_ocr_result(pred_bboxes, dt_boxes, rec_res)
         matched_index = self.match_result(dt_boxes, pred_bboxes)

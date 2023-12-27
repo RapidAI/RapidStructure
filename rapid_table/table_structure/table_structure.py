@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import time
+
 import numpy as np
 
 from .utils import OrtInferSession, TableLabelDecode, TablePreprocess
@@ -53,4 +54,4 @@ class TableStructurer:
             + ["</table>", "</body>", "</html>"]
         )
         elapse = time.time() - starttime
-        return (structure_str_list, bbox_list), elapse
+        return structure_str_list, bbox_list, elapse
