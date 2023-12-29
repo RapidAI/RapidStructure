@@ -61,7 +61,9 @@ def demo_table():
     if not save_dir.exists():
         save_dir.mkdir(parents=True, exist_ok=True)
 
-    viser(img_path, save_dir, table_html_str, table_cell_bboxes)
+    save_html_path = save_dir / f"{Path(img_path).stem}.html"
+    save_drawed_path = save_dir / f"vis_{Path(img_path).name}"
+    viser(img_path, table_html_str, save_html_path, table_cell_bboxes, save_drawed_path)
     print(table_html_str)
 
 

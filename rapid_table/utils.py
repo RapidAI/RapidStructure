@@ -86,16 +86,17 @@ class VisTable:
     def __call__(
         self,
         img_path: Union[str, Path],
-        save_dir: Union[str, Path],
         table_html_str: str,
+        save_html_path: Optional[str] = None,
         table_cell_bboxes: Optional[np.ndarray] = None,
+        save_drawed_path: Optional[str] = None,
     ) -> None:
-        save_html_path = save_dir / "table_res.html"
-        save_vis_img = save_dir / "table_res_vis.png"
-        self.export_html(table_html_str=table_html_str, save_path=save_html_path)
+        if save_html_path:
+            html_with_border = self.insert_border_style(table_html_str)
+            self.save_html(save_html_path, html_with_border)
 
         if table_cell_bboxes is None:
-            return
+            return None
 
         img = self.load_img(img_path)
 
@@ -107,17 +108,19 @@ class VisTable:
         else:
             raise ValueError("Shape of table bounding boxes is not between in 4 or 8.")
 
-        self.save_img(save_vis_img, drawed_img)
+        if save_drawed_path:
+            self.save_img(save_drawed_path, drawed_img)
 
-    def export_html(self, table_html_str: str, save_path: Union[str, Path]):
+        return drawed_img
+
+    def insert_border_style(self, table_html_str: str):
         style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
                     table, th {border-top:1px solid;font-size: 10px;
                     border-collapse: collapse;border-right: 1px solid;}
                     </style>"""
         prefix_table, suffix_table = table_html_str.split("<body>")
-        new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
-        with open(save_path, "w", encoding="utf-8") as f:
-            f.write(new_table_res)
+        html_with_border = f"{prefix_table}{style_res}<body>{suffix_table}"
+        return html_with_border
 
     @staticmethod
     def draw_rectangle(img: np.ndarray, boxes: np.ndarray) -> np.ndarray:
@@ -138,3 +141,8 @@ class VisTable:
     @staticmethod
     def save_img(save_path: Union[str, Path], img: np.ndarray):
         cv2.imwrite(str(save_path), img)
+
+    @staticmethod
+    def save_html(save_path: Union[str, Path], html: str):
+        with open(save_path, "w", encoding="utf-8") as f:
+            f.write(html)

@@ -33,13 +33,16 @@ pip install rapid_table
 #### 使用方式
 1. python脚本运行
     ````python
+    from pathlib import Path
+
     from rapid_table import RapidTable
-    from rapidocr_onnxruntime import RapidOCR
+    from rapid_table import RapidTable, VisTable
 
     # RapidTable类提供model_path参数，可以自行指定上述2个模型，默认是en_ppstructure_mobile_v2_SLANet.onnx
     # table_engine = RapidTable(model_path='ch_ppstructure_mobile_v2_SLANet.onnx')
     table_engine = RapidTable()
     ocr_engine = RapidOCR()
+    viser = VisTable()
 
     img_path = 'test_images/table.jpg'
 
@@ -47,11 +50,13 @@ pip install rapid_table
     table_html_str, table_cell_bboxes, elapse = table_engine(img_path, ocr_result)
 
     save_dir = Path("./inference_results/")
-    if not save_dir.exists():
-        save_dir.mkdir(parents=True, exist_ok=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
 
-    # 可视化结果，如果不提供table_cell_bboxes，只会导出html文件
-    viser(img_path, save_dir, table_html_str, table_cell_bboxes)
+    save_html_path = save_dir / f"{Path(img_path).stem}.html"
+    save_drawed_path = save_dir / f"vis_{Path(img_path).name}"
+
+    viser(img_path, table_html_str, save_html_path, table_cell_bboxes, save_drawed_path)
+
     print(table_html_str)
     ````
 2. 终端运行
@@ -84,6 +89,9 @@ pip install rapid_table
     </div>
 
 #### 更新日志
+#### 2023-12-29 v0.1.3 update:
+- 优化可视化结果部分
+
 ##### 2023-12-27 v0.1.2 update:
 - 添加返回cell坐标框参数
 - 完善可视化函数
