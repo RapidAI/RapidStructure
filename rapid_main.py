@@ -91,7 +91,7 @@ def test_input():
     table_html = []
     for i, cropped_img in enumerate(img_crop_list):
         ocr_result, _ = ocr_engine(cropped_img)
-        table_html_str, _ = table_engine(cropped_img, ocr_result)
+        table_html_str, _, _ = table_engine(cropped_img, ocr_result)
         table_html.append(table_html_str)  # i,
 
     print(table_html)
