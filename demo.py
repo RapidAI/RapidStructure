@@ -35,10 +35,28 @@ def vis_layout(img: np.ndarray, layout_res: list) -> None:
     print(f"The infer result has saved in {image_save}")
 
 
+def vis_table(table_res):
+    style_res = """<style>td {border-left: 1px solid;border-bottom:1px solid;}
+                   table, th {border-top:1px solid;font-size: 10px;
+                   border-collapse: collapse;border-right: 1px solid;}
+                </style>"""
+    prefix_table, suffix_table = table_res.split("<body>")
+    new_table_res = f"{prefix_table}{style_res}<body>{suffix_table}"
+
+    draw_img_save = Path("./inference_results/")
+    if not draw_img_save.exists():
+        draw_img_save.mkdir(parents=True, exist_ok=True)
+
+    html_path = str(draw_img_save / "table_result.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(new_table_res)
+    print(f"The infer result has saved in {html_path}")
+
+
 def demo_layout():
     layout_engine = RapidLayout()
 
-    img = cv2.imread("tests/test_files/layout.png")
+    img = cv2.imread("test_images/layout.png")
 
     layout_res, _ = layout_engine(img)
 
@@ -50,6 +68,9 @@ def demo_table():
     from rapidocr_onnxruntime import RapidOCR
 
     table_engine = RapidTable()
+    img = cv2.imread("tests/test_files/table.jpg")
+    table_html_str, _ = table_engine(img)
+
     ocr_engine = RapidOCR()
     viser = VisTable()
 
