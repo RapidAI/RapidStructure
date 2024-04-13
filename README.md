@@ -21,6 +21,8 @@
 
 可配套使用项目：[RapidOCR](https://github.com/RapidAI/RapidOCR)
 
+相关模型托管：[Hugging Face Models](https://huggingface.co/SWHL/RapidStructure)
+
 ### [文档方向分类](./docs/README_Orientation.md)
 ### [版面分析](./docs/README_Layout.md)
 ### [表格识别](./docs/README_Table.md)
