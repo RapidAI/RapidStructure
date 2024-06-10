@@ -65,18 +65,19 @@ def demo_layout():
 
 
 def demo_table():
-    from rapidocr_onnxruntime import RapidOCR
-
-    table_engine = RapidTable()
-    img = cv2.imread("tests/test_files/table.jpg")
-    table_html_str, _ = table_engine(img)
+    from rapidocr_onnxruntime import RapidOCR, VisRes
 
     ocr_engine = RapidOCR()
+    vis_ocr = VisRes()
+    table_engine = RapidTable()
     viser = VisTable()
 
-    img_path = "tests/test_files/table.jpg"
+    img_path = "1.png"
     ocr_result, _ = ocr_engine(img_path)
+
     table_html_str, table_cell_bboxes, _ = table_engine(img_path, ocr_result)
+
+    boxes, txts, scores = list(zip(*ocr_result))
 
     save_dir = Path("./inference_results/")
     if not save_dir.exists():
@@ -84,7 +85,11 @@ def demo_table():
 
     save_html_path = save_dir / f"{Path(img_path).stem}.html"
     save_drawed_path = save_dir / f"vis_{Path(img_path).name}"
-    viser(img_path, table_html_str, save_html_path, table_cell_bboxes, save_drawed_path)
+    vis_imged = viser(
+        img_path, table_html_str, save_html_path, table_cell_bboxes, save_drawed_path
+    )
+    res = vis_ocr(vis_imged, boxes)
+    cv2.imwrite("only_vis_det.png", res)
     print(table_html_str)
 
 
