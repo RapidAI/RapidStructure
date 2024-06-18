@@ -1,259 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-import copy
-import warnings
-from io import BytesIO
-from pathlib import Path
-from typing import Union
-
-import cv2
 import numpy as np
-import yaml
-from onnxruntime import (
-    GraphOptimizationLevel,
-    InferenceSession,
-    SessionOptions,
-    get_available_providers,
-    get_device,
-)
-from PIL import Image, UnidentifiedImageError
-
-InputType = Union[str, np.ndarray, bytes, Path]
-
-
-class OrtInferSession:
-    def __init__(self, config):
-        sess_opt = SessionOptions()
-        sess_opt.log_severity_level = 4
-        sess_opt.enable_cpu_mem_arena = False
-        sess_opt.graph_optimization_level = GraphOptimizationLevel.ORT_ENABLE_ALL
-
-        cuda_ep = "CUDAExecutionProvider"
-        cpu_ep = "CPUExecutionProvider"
-        cpu_provider_options = {
-            "arena_extend_strategy": "kSameAsRequested",
-        }
-
-        EP_list = []
-        if (
-            config["use_cuda"]
-            and get_device() == "GPU"
-            and cuda_ep in get_available_providers()
-        ):
-            EP_list = [(cuda_ep, config[cuda_ep])]
-        EP_list.append((cpu_ep, cpu_provider_options))
-
-        self._verify_model(config["model_path"])
-        self.session = InferenceSession(
-            config["model_path"], sess_options=sess_opt, providers=EP_list
-        )
-
-        if config["use_cuda"] and cuda_ep not in self.session.get_providers():
-            warnings.warn(
-                f"{cuda_ep} is not avaiable for current env, the inference part is automatically shifted to be executed under {cpu_ep}.\n"
-                "Please ensure the installed onnxruntime-gpu version matches your cuda and cudnn version, "
-                "you can check their relations from the offical web site: "
-                "https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html",
-                RuntimeWarning,
-            )
-
-    def __call__(self, input_content: np.ndarray) -> np.ndarray:
-        input_dict = dict(zip(self.get_input_names(), [input_content]))
-        try:
-            return self.session.run(self.get_output_names(), input_dict)
-        except Exception as e:
-            raise ONNXRuntimeError("ONNXRuntime inferece failed.") from e
-
-    def get_input_names(
-        self,
-    ):
-        return [v.name for v in self.session.get_inputs()]
-
-    def get_output_names(
-        self,
-    ):
-        return [v.name for v in self.session.get_outputs()]
-
-    def get_metadata(self):
-        meta_dict = self.session.get_modelmeta().custom_metadata_map
-        return meta_dict
-
-    @staticmethod
-    def _verify_model(model_path):
-        model_path = Path(model_path)
-        if not model_path.exists():
-            raise FileNotFoundError(f"{model_path} does not exists.")
-        if not model_path.is_file():
-            raise FileExistsError(f"{model_path} is not a file.")
-
-
-class ONNXRuntimeError(Exception):
-    pass
-
-
-class LoadImage:
-    def __init__(
-        self,
-    ):
-        pass
-
-    def __call__(self, img: InputType) -> np.ndarray:
-        if not isinstance(img, InputType.__args__):
-            raise LoadImageError(
-                f"The img type {type(img)} does not in {InputType.__args__}"
-            )
-
-        img = self.load_img(img)
-
-        if img.ndim == 2:
-            return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
-        if img.ndim == 3 and img.shape[2] == 4:
-            return self.cvt_four_to_three(img)
-
-        return img
-
-    def load_img(self, img: InputType) -> np.ndarray:
-        if isinstance(img, (str, Path)):
-            self.verify_exist(img)
-            try:
-                img = np.array(Image.open(img))
-                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            except UnidentifiedImageError as e:
-                raise LoadImageError(f"cannot identify image file {img}") from e
-            return img
-
-        if isinstance(img, bytes):
-            img = np.array(Image.open(BytesIO(img)))
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            return img
-
-        if isinstance(img, np.ndarray):
-            return img
-
-        raise LoadImageError(f"{type(img)} is not supported!")
-
-    @staticmethod
-    def cvt_four_to_three(img: np.ndarray) -> np.ndarray:
-        """RGBA → RGB"""
-        r, g, b, a = cv2.split(img)
-        new_img = cv2.merge((b, g, r))
-
-        not_a = cv2.bitwise_not(a)
-        not_a = cv2.cvtColor(not_a, cv2.COLOR_GRAY2BGR)
-
-        new_img = cv2.bitwise_and(new_img, new_img, mask=a)
-        new_img = cv2.add(new_img, not_a)
-        return new_img
-
-    @staticmethod
-    def verify_exist(file_path: Union[str, Path]):
-        if not Path(file_path).exists():
-            raise LoadImageError(f"{file_path} does not exist.")
-
-
-class LoadImageError(Exception):
-    pass
-
-
-def transform(data, ops=None):
-    """transform"""
-    if ops is None:
-        ops = []
-
-    for op in ops:
-        data = op(data)
-        if data is None:
-            return None
-    return data
-
-
-def create_operators(op_param_dict):
-    ops = []
-    for op_name, param in op_param_dict.items():
-        if param is None:
-            param = {}
-        op = eval(op_name)(**param)
-        ops.append(op)
-    return ops
-
-
-class Resize:
-    def __init__(self, size=(640, 640)):
-        self.size = size
-
-    def resize_image(self, img):
-        resize_h, resize_w = self.size
-        ori_h, ori_w = img.shape[:2]  # (h, w, c)
-        ratio_h = float(resize_h) / ori_h
-        ratio_w = float(resize_w) / ori_w
-        img = cv2.resize(img, (int(resize_w), int(resize_h)))
-        return img, [ratio_h, ratio_w]
-
-    def __call__(self, data):
-        img = data["image"]
-        if "polys" in data:
-            text_polys = data["polys"]
-
-        img_resize, [ratio_h, ratio_w] = self.resize_image(img)
-        if "polys" in data:
-            new_boxes = []
-            for box in text_polys:
-                new_box = []
-                for cord in box:
-                    new_box.append([cord[0] * ratio_w, cord[1] * ratio_h])
-                new_boxes.append(new_box)
-            data["polys"] = np.array(new_boxes, dtype=np.float32)
-        data["image"] = img_resize
-        return data
-
-
-class NormalizeImage:
-    def __init__(self, scale=None, mean=None, std=None, order="chw"):
-        if isinstance(scale, str):
-            scale = eval(scale)
-
-        self.scale = np.float32(scale if scale is not None else 1.0 / 255.0)
-        mean = mean if mean is not None else [0.485, 0.456, 0.406]
-        std = std if std is not None else [0.229, 0.224, 0.225]
-
-        shape = (3, 1, 1) if order == "chw" else (1, 1, 3)
-        self.mean = np.array(mean).reshape(shape).astype("float32")
-        self.std = np.array(std).reshape(shape).astype("float32")
-
-    def __call__(self, data):
-        img = np.array(data["image"])
-        assert isinstance(img, np.ndarray), "invalid input 'img' in NormalizeImage"
-        data["image"] = (img.astype("float32") * self.scale - self.mean) / self.std
-        return data
-
-
-class ToCHWImage:
-    def __init__(self, **kwargs):
-        pass
-
-    def __call__(self, data):
-        img = np.array(data["image"])
-        data["image"] = img.transpose((2, 0, 1))
-        return data
-
-
-class KeepKeys:
-    def __init__(self, keep_keys):
-        self.keep_keys = keep_keys
-
-    def __call__(self, data):
-        data_list = []
-        for key in self.keep_keys:
-            data_list.append(data[key])
-        return data_list
-
-
-def read_yaml(yaml_path):
-    with open(yaml_path, "rb") as f:
-        data = yaml.load(f, Loader=yaml.Loader)
-    return data
 
 
 class PicoDetPostProcess:
@@ -277,9 +25,9 @@ class PicoDetPostProcess:
         scores, raw_boxes = preds["boxes"], preds["boxes_num"]
         batch_size = raw_boxes[0].shape[0]
         reg_max = int(raw_boxes[0].shape[-1] / 4 - 1)
+
         out_boxes_num = []
         out_boxes_list = []
-        results = []
         ori_shape, input_shape, scale_factor = self.img_info(ori_img, img)
 
         for batch_id in range(batch_size):
@@ -372,12 +120,14 @@ class PicoDetPostProcess:
         out_boxes_list = np.concatenate(out_boxes_list, axis=0)
         out_boxes_num = np.asarray(out_boxes_num).astype(np.int32)
 
+        boxes, scores, class_names = [], [], []
         for dt in out_boxes_list:
             clsid, bbox, score = int(dt[0]), dt[2:], dt[1]
             label = self.labels[clsid]
-            result = {"bbox": bbox, "label": label}
-            results.append(result)
-        return results
+            boxes.append(bbox)
+            scores.append(score)
+            class_names.append(label)
+        return np.array(boxes), np.array(scores), np.array(class_names)
 
     def load_layout_dict(self, layout_dict_path):
         with open(layout_dict_path, "r", encoding="utf-8") as fp:
@@ -406,8 +156,7 @@ class PicoDetPostProcess:
             xy[:, [0, 2]] = xy[:, [0, 2]].clip(0, width)
             xy[:, [1, 3]] = xy[:, [1, 3]].clip(0, height)
             return xy.astype(np.float32)
-        else:
-            return boxes
+        return boxes
 
     def img_info(self, ori_img, img):
         origin_shape = ori_img.shape
@@ -505,29 +254,3 @@ class PicoDetPostProcess:
         """
         hw = np.clip(right_bottom - left_top, 0.0, None)
         return hw[..., 0] * hw[..., 1]
-
-
-def vis_layout(img: np.ndarray, layout_res: list, save_path: str) -> None:
-    font = cv2.FONT_HERSHEY_COMPLEX
-    font_scale = 1
-    font_color = (0, 0, 255)
-    font_thickness = 1
-
-    tmp_img = copy.deepcopy(img)
-    for v in layout_res:
-        bbox = np.round(v["bbox"]).astype(np.int32)
-        label = v["label"]
-
-        start_point = (bbox[0], bbox[1])
-        end_point = (bbox[2], bbox[3])
-
-        cv2.rectangle(tmp_img, start_point, end_point, (0, 255, 0), 2)
-
-        (w, h), _ = cv2.getTextSize(label, font, font_scale, font_thickness)
-        put_point = start_point[0], start_point[1] + h
-        cv2.putText(
-            tmp_img, label, put_point, font, font_scale, font_color, font_thickness
-        )
-
-    cv2.imwrite(save_path, tmp_img)
-    print(f"The infer result has saved in {save_path}")

@@ -27,5 +27,4 @@ img = cv2.imread(str(img_path))
 )
 def test_multi_input(img_content):
     layout_res, elapse = layout_engine(img_content)
-
-    assert len(layout_res) == 13
+    assert len(layout_res) == 15

@@ -44,7 +44,7 @@ setuptools.setup(
         "onnxruntime>=1.7.0",
         "PyYAML>=6.0",
         "opencv_python>=4.5.1.48",
-        "numpy>=1.21.6",
+        "numpy>=1.21.6,<2",
         "Pillow",
     ],
     packages=[MODULE_NAME, f"{MODULE_NAME}.models"],
@@ -57,8 +57,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
-    python_requires=">=3.6,<3.12",
+    python_requires=">=3.6,<3.13",
     entry_points={
         "console_scripts": [f"{MODULE_NAME}={MODULE_NAME}.{MODULE_NAME}:main"]
     },

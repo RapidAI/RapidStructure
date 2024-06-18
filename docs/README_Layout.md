@@ -11,35 +11,40 @@
 - 具体来说，就是分析给定的文档类别图像（论文截图等），定位其中类别和位置，如标题、段落、表格和图片等各个部分。
 - 目前支持三种类别的版面分析模型：中文、英文和表格版面分析模型，具体可参见下面表格：
 
-    | 模型类型 |        模型名称         | 模型大小 |                                            支持种类                                             |
-    | :------: | :---------------------: | :------: | :---------------------------------------------------------------------------------------------: |
-    |   表格   |   `layout_table.onnx`   |  7.06M   |                                             `table`                                             |
-    |   英文   | `layout_publaynet.onnx` |  7.06M   |                                 `text title list table figure`                                  |
-    |   中文   |   `layout_cdla.onnx`    |  7.07M   | `text title figure  figure_caption table table_caption` <br> `header footer reference equation` |
+    |`model_type`| 版面类型 |        模型名称          |  支持类别|
+    | :------ | :----- | :------ | :----- |
+    |`pp_layout_table`|   表格   |   `layout_table.onnx`     |`table` |
+    | `pp_layout_publaynet`|   英文   | `layout_publaynet.onnx`   |`text title list table figure` |
+    | `pp_layout_table`|   中文   |   `layout_cdla.onnx`    | `text title figure  figure_caption table table_caption` <br> `header footer reference equation` |
 
 - 模型下载地址为：[百度网盘](https://pan.baidu.com/s/1PI9fksW6F6kQfJhwUkewWg?pwd=p29g) | [Google Drive](https://drive.google.com/drive/folders/1DAPWSN2zGQ-ED_Pz7RaJGTjfkN2-Mvsf?usp=sharing)
 
+#### 安装
+由于模型较小，预先将中文版面分析模型(`layout_cdla.onnx`)打包进了whl包内，如果做中文版面分析，可直接安装使用
+
+```bash
+$ pip install rapid-layout
+```
+
 #### 使用方式
-1. pip安装
-   - 由于模型较小，预先将中文版面分析模型(`layout_cdla.onnx`)打包进了whl包内，如果做中文版面分析，可直接安装使用
-        ```bash
-        $ pip install rapid-layout
-        ```
-2. python脚本运行
+1. python脚本运行
     ```python
     import cv2
-    from rapid_layout import RapidLayout
+    from rapid_layout import RapidLayout，vis_layout
 
-    # RapidLayout类提供model_path参数，可以自行指定上述3个模型，默认是layout_cdla.onnx
-    # layout_engine = RapidLayout(model_path='layout_publaynet.onnx')
-    layout_engine = RapidLayout()
+    # model_type类型参见上表。指定不同model_type时，会自动下载相应模型到安装目录下的。
+    layout_engine = RapidLayout(box_threshold=0.5, model_type="pp_layout_cdla")
 
     img = cv2.imread('test_images/layout.png')
 
     layout_res, elapse = layout_engine(img)
+
+    ploted_img = vis_layout(img, layout_res)
+    cv2.imwrite("layout_res.png", ploted_img)
+    print(layout_res)
     ```
 
-3. 终端运行
+2. 终端运行
    - 用法:
      ```bash
      $ rapid_layout -h
@@ -58,7 +63,7 @@
      $ rapid_layout -v -img test_images/layout.png
      ```
 
-4. 结果
+3. 结果
     - 返回结果
         ```python
         # bbox: [左上角x0,左上角y0, 右下角x1, 右下角y1]
