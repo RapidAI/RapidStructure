@@ -38,8 +38,10 @@ class DownloadModel:
         return str(save_file_path)
 
     @staticmethod
-    def download_as_bytes_with_progress(url: str, name: Optional[str] = None) -> bytes:
-        resp = requests.get(url, stream=True, allow_redirects=True, timeout=180)
+    def download_as_bytes_with_progress(
+        url: Union[str, Path], name: Optional[str] = None
+    ) -> bytes:
+        resp = requests.get(str(url), stream=True, allow_redirects=True, timeout=180)
         total = int(resp.headers.get("content-length", 0))
         bio = io.BytesIO()
         with tqdm(

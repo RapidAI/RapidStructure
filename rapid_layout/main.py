@@ -14,7 +14,7 @@
 import argparse
 import time
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -24,6 +24,7 @@ from .utils import (
     LoadImage,
     OrtInferSession,
     PicoDetPostProcess,
+    VisLayout,
     create_operators,
     get_logger,
     read_yaml,
@@ -64,23 +65,16 @@ class RapidLayout:
         self.postprocess_op = PicoDetPostProcess(labels, **config["post_process"])
         self.load_img = LoadImage()
 
-    def get_model_path(self, model_type: Optional[str] = None) -> str:
-        model_url = KEY_TO_MODEL_URL.get(model_type, None)
-        if model_url:
-            model_path = DownloadModel.download(model_url)
-            return model_path
-        logger.info("model url is None, using the default model %s", DEFAULT_MODEL_PATH)
-        return DEFAULT_MODEL_PATH
-
-    def __call__(self, img_content: Union[str, np.ndarray, bytes, Path]):
+    def __call__(
+        self, img_content: Union[str, np.ndarray, bytes, Path]
+    ) -> Tuple[Optional[np.ndarray], Optional[np.ndarray], Optional[np.ndarray], float]:
         img = self.load_img(img_content)
 
         ori_im = img.copy()
         data = transform({"image": img}, self.preprocess_op)
         img = data[0]
-
         if img is None:
-            return None, None, None, 0
+            return None, None, None, 0.0
 
         img = np.expand_dims(img, axis=0)
         img = img.copy()
@@ -100,6 +94,16 @@ class RapidLayout:
         )
         elapse = time.time() - starttime
         return boxes, scores, class_names, elapse
+
+    @staticmethod
+    def get_model_path(model_type: str) -> str:
+        model_url = KEY_TO_MODEL_URL.get(model_type, None)
+        if model_url:
+            model_path = DownloadModel.download(model_url)
+            return model_path
+
+        logger.info("model url is None, using the default model %s", DEFAULT_MODEL_PATH)
+        return DEFAULT_MODEL_PATH
 
 
 def main():
@@ -135,14 +139,17 @@ def main():
     )
 
     img = cv2.imread(args.img_path)
-    layout_res, elapse = layout_engine(img)
-    print(layout_res)
+    boxes, scores, class_names, *elapse = layout_engine(img)
+    print(boxes)
+    print(scores)
+    print(class_names)
 
     if args.vis:
         img_path = Path(args.img_path)
-        ploted_img = vis_layout(img, layout_res)
-        save_path = img_path.resolve().parent / f"vis_{img_path.name}"
-        cv2.imwrite(str(save_path), ploted_img)
+        ploted_img = VisLayout.draw_detections(img, boxes, scores, class_names)
+        if ploted_img is not None:
+            save_path = img_path.resolve().parent / f"vis_{img_path.name}"
+            cv2.imwrite(str(save_path), ploted_img)
 
 
 if __name__ == "__main__":

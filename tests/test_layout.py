@@ -26,5 +26,5 @@ img = cv2.imread(str(img_path))
     "img_content", [img_path, str(img_path), open(img_path, "rb").read(), img]
 )
 def test_multi_input(img_content):
-    layout_res, elapse = layout_engine(img_content)
-    assert len(layout_res) == 15
+    boxes, scores, class_names, *elapse = layout_engine(img_content)
+    assert len(boxes) == 15

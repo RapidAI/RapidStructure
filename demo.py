@@ -1,11 +1,9 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-import copy
 from pathlib import Path
 
 import cv2
-import numpy as np
 
 from rapid_layout import RapidLayout, VisLayout
 from rapid_orientation import RapidOrientation
@@ -37,9 +35,9 @@ def demo_layout():
     img = cv2.imread(img_path)
 
     boxes, scores, class_names, *elapse = layout_engine(img)
-
     ploted_img = VisLayout.draw_detections(img, boxes, scores, class_names)
-    cv2.imwrite("layout_res.png", ploted_img)
+    if ploted_img is not None:
+        cv2.imwrite("layout_res.png", ploted_img)
 
 
 def demo_table():

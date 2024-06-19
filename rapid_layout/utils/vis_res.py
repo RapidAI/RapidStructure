@@ -1,35 +1,10 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-import copy
-from typing import Any, Dict, List
+from typing import Optional
 
 import cv2
 import numpy as np
-
-
-def vis_layout(img: np.ndarray, layout_res: List[Dict[str, Any]]) -> np.ndarray:
-    font = cv2.FONT_HERSHEY_COMPLEX
-    font_scale = 1
-    font_color = (0, 0, 255)
-    font_thickness = 1
-
-    tmp_img = copy.deepcopy(img)
-    for v in layout_res:
-        bbox = np.round(v["bbox"]).astype(np.int32)
-        label = v["label"]
-
-        start_point = (bbox[0], bbox[1])
-        end_point = (bbox[2], bbox[3])
-
-        cv2.rectangle(tmp_img, start_point, end_point, (0, 255, 0), 2)
-
-        (w, h), _ = cv2.getTextSize(label, font, font_scale, font_thickness)
-        put_point = start_point[0], start_point[1] + h
-        cv2.putText(
-            tmp_img, label, put_point, font, font_scale, font_color, font_thickness
-        )
-    return tmp_img
 
 
 class VisLayout:
@@ -37,11 +12,11 @@ class VisLayout:
     def draw_detections(
         cls,
         image: np.ndarray,
-        boxes: np.ndarray,
-        scores: np.ndarray,
-        class_names: np.ndarray,
+        boxes: Optional[np.ndarray],
+        scores: Optional[np.ndarray],
+        class_names: Optional[np.ndarray],
         mask_alpha=0.3,
-    ):
+    ) -> Optional[np.ndarray]:
         """_summary_
 
         Args:
@@ -52,8 +27,10 @@ class VisLayout:
             mask_alpha (float, optional): _description_. Defaults to 0.3.
 
         Returns:
-            _type_: _description_
+            np.ndarray: _description_
         """
+        if boxes is None or scores is None or class_names is None:
+            return None
 
         det_img = image.copy()
 
@@ -61,14 +38,12 @@ class VisLayout:
         font_size = min([img_height, img_width]) * 0.0006
         text_thickness = int(min([img_height, img_width]) * 0.001)
 
-        det_img = cls.draw_masks(det_img, boxes, class_names, mask_alpha)
+        det_img = cls.draw_masks(det_img, boxes, mask_alpha)
 
-        # Draw bounding boxes and labels of detections
         for label, box, score in zip(class_names, boxes, scores):
             color = cls.get_color()
 
             cls.draw_box(det_img, box, color)
-
             caption = f"{label} {int(score * 100)}%"
             cls.draw_text(det_img, caption, box, color, font_size, text_thickness)
 
@@ -120,18 +95,12 @@ class VisLayout:
         cls,
         image: np.ndarray,
         boxes: np.ndarray,
-        classes: np.ndarray,
         mask_alpha: float = 0.3,
     ) -> np.ndarray:
         mask_img = image.copy()
-
-        # Draw bounding boxes and labels of detections
-        for box, class_name in zip(boxes, classes):
+        for box in boxes:
             color = cls.get_color()
-
             x1, y1, x2, y2 = box.astype(int)
-
-            # Draw fill rectangle in mask image
             cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
 
         return cv2.addWeighted(mask_img, mask_alpha, image, 1 - mask_alpha, 0)
