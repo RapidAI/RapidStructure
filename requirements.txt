@@ -8,3 +8,5 @@ onnxruntime
 wheel
 get_pypi_latest_version
 Pillow
+tqdm
+requests
