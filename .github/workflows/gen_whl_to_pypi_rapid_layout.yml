@@ -34,6 +34,7 @@ jobs:
           wget $RESOURCES_URL
           ZIP_NAME=${RESOURCES_URL##*/}
           DIR_NAME=${ZIP_NAME%.*}
+
           unzip $DIR_NAME
           cp $DIR_NAME/*.onnx rapid_layout/models/
           pip install -r requirements.txt
