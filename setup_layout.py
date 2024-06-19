@@ -46,6 +46,8 @@ setuptools.setup(
         "opencv_python>=4.5.1.48",
         "numpy>=1.21.6,<2",
         "Pillow",
+        "tqdm",
+        "requests",
     ],
     packages=[MODULE_NAME, f"{MODULE_NAME}.models", f"{MODULE_NAME}.utils"],
     package_data={"": ["layout_cdla.onnx", "*.yaml"]},
