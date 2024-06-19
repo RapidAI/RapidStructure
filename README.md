@@ -15,8 +15,6 @@
 </div>
 
 ### 简介
-> 🎉 推出知识星球[RapidAI私享群](https://t.zsxq.com/0duLBZczw)，这里的提问会优先得到回答和支持，也会享受到RapidAI组织后续持续优质的服务，欢迎大家的加入。
-
 该部分的功能主要针对文档类图像，包括文档图像分类、版面分析和表格识别。
 
 可配套使用项目：[RapidOCR](https://github.com/RapidAI/RapidOCR)
@@ -24,7 +22,7 @@
 相关模型托管：[Hugging Face Models](https://huggingface.co/SWHL/RapidStructure)
 
 ### [文档方向分类](./docs/README_Orientation.md)
-### [版面分析](./docs/README_Layout.md)
+### [版面分析](https://github.com/RapidAI/RapidLayout)
 ### [表格识别](./docs/README_Table.md)
 更多表格识别：[TableStructureRec](https://github.com/RapidAI/TableStructureRec)
 
