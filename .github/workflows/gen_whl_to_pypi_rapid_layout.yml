@@ -55,7 +55,7 @@ jobs:
           DIR_NAME=${ZIP_NAME%.*}
           unzip $ZIP_NAME
           mv $DIR_NAME/*.onnx rapid_layout/models/
-          python setup_layout.py bdist_wheel ${{ github.event.head_commit.message }}
+          python setup_layout.py bdist_wheel "${{ github.event.head_commit.message }}"
 
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
