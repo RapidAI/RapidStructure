@@ -1,9 +1,9 @@
-numpy>=1.21.6
+numpy>=1.21.6,<2.0.0
 opencv_python>=4.6.0.66
 setuptools>=61.2.0
 PyYAML
-pytest>=7.2.1
-pip>=22.3.1
+pytest>=7.2.1,<9.0.0
+pip>=24.0
 onnxruntime
 wheel
 get_pypi_latest_version
