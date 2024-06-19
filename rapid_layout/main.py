@@ -150,6 +150,7 @@ def main():
         if ploted_img is not None:
             save_path = img_path.resolve().parent / f"vis_{img_path.name}"
             cv2.imwrite(str(save_path), ploted_img)
+            print(f"The visualized image has been saved in {save_path}")
 
 
 if __name__ == "__main__":

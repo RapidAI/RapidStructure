@@ -47,7 +47,7 @@ setuptools.setup(
         "numpy>=1.21.6,<2",
         "Pillow",
     ],
-    packages=[MODULE_NAME, f"{MODULE_NAME}.models"],
+    packages=[MODULE_NAME, f"{MODULE_NAME}.models", f"{MODULE_NAME}.utils"],
     package_data={"": ["layout_cdla.onnx", "*.yaml"]},
     keywords=["ppstructure,layout,rapidocr,rapid_layout"],
     classifiers=[
@@ -60,7 +60,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.12",
     ],
     python_requires=">=3.6,<3.13",
-    entry_points={
-        "console_scripts": [f"{MODULE_NAME}={MODULE_NAME}.{MODULE_NAME}:main"]
-    },
+    entry_points={"console_scripts": [f"{MODULE_NAME}={MODULE_NAME}.main:main"]},
 )

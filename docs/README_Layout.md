@@ -46,18 +46,21 @@ $ pip install rapid-layout
 
 2. 终端运行
    - 用法:
-     ```bash
-     $ rapid_layout -h
-     usage: rapid_layout [-h] [-v] -img IMG_PATH [-m MODEL_PATH]
+        ```bash
+        $ rapid_layout -h
+        usage: rapid_layout [-h] -img IMG_PATH [-m {pp_layout_cdla,pp_layout_publaynet,pp_layout_table}]
+                            [--box_threshold {pp_layout_cdla,pp_layout_publaynet,pp_layout_table}] [-v]
 
-     optional arguments:
-     -h, --help            show this help message and exit
-     -v, --vis             Wheter to visualize the layout results.
-     -img IMG_PATH, --img_path IMG_PATH
-                           Path to image for layout.
-     -m MODEL_PATH, --model_path MODEL_PATH
-                           The model path used for inference.
-     ```
+        options:
+        -h, --help            show this help message and exit
+        -img IMG_PATH, --img_path IMG_PATH
+                                Path to image for layout.
+        -m {pp_layout_cdla,pp_layout_publaynet,pp_layout_table}, --model_type {pp_layout_cdla,pp_layout_publaynet,pp_layout_table}
+                                Support model type
+        --box_threshold {pp_layout_cdla,pp_layout_publaynet,pp_layout_table}
+                                Box threshold, the range is [0, 1]
+        -v, --vis             Wheter to visualize the layout results.
+        ```
    - 示例:
      ```bash
      $ rapid_layout -v -img test_images/layout.png
