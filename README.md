@@ -26,10 +26,12 @@
 ### [表格识别](./docs/README_Table.md)
 更多表格识别：[TableStructureRec](https://github.com/RapidAI/TableStructureRec)
 
+### 🔥🔥[版面还原](https://github.com/RapidAI/RapidLayoutRecover)
+
 ### 整体流程
 ```mermaid
 flowchart TD
     A[/文档图像/] --> B([文档方向分类 rapid_orientation]) --> C([版面分析 rapid_layout])
-    C --> D([表格识别 rapid_table]) & E([公式识别 rapid_latex_ocr]) & F([文字识别 rapidocr_onnxruntime]) --> G([版面还原])
+    C --> D([表格识别 rapid_table]) & E([公式识别 rapid_latex_ocr]) & F([文字识别 rapidocr_onnxruntime]) --> G([版面还原 rapid_layout_recover])
     G --> H[/结构化输出/]
 ```
