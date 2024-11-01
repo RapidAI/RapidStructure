@@ -1,3 +1,6 @@
+
+> ## 📣 原有RapidStructure仓库已经移到[RapidDoc](https://github.com/RapidAI/RapidDoc)下了，RapidStructure也将以RapidDoc方式重生
+
 <div align="center">
   <div align="center">
     <h1><b>Rapid Orientation</b></h1>
