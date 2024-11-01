@@ -1,1 +1,0 @@
-### For details, see [Rapid Table](https://github.com/RapidAI/RapidStructure/blob/main/docs/README_Table.md)

@@ -15,6 +15,7 @@
 </div>
 
 ### 简介
+
 该部分的功能主要针对文档类图像，包括文档图像分类、版面分析和表格识别。
 
 可配套使用项目：[RapidOCR](https://github.com/RapidAI/RapidOCR)
@@ -22,13 +23,17 @@
 相关模型托管：[Hugging Face Models](https://huggingface.co/SWHL/RapidStructure)
 
 ### [文档方向分类](./docs/README_Orientation.md)
+
 ### [版面分析](https://github.com/RapidAI/RapidLayout)
-### [表格识别](./docs/README_Table.md)
+
+### [表格识别](https://github.com/RapidAI/RapidTable)
+
 更多表格识别：[TableStructureRec](https://github.com/RapidAI/TableStructureRec)
 
-### 🔥🔥[版面还原](https://github.com/RapidAI/RapidLayoutRecover)
+### 🔥🔥[版面还原](https://github.com/RapidAI/RapidDoc)
 
 ### 整体流程
+
 ```mermaid
 flowchart TD
     A[/文档图像/] --> B([文档方向分类 rapid_orientation]) --> C([版面分析 rapid_layout])

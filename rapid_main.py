@@ -5,10 +5,9 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from rapidocr_onnxruntime import RapidOCR
-
 from rapid_layout import RapidLayout
 from rapid_table import RapidTable
+from rapidocr_onnxruntime import RapidOCR
 
 
 def sorted_boxes(dt_boxes):
