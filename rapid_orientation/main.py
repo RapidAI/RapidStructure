@@ -17,7 +17,7 @@
 import argparse
 import time
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -29,7 +29,7 @@ root_dir = Path(__file__).resolve().parent
 
 
 class RapidOrientation:
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_path: Optional[str] = None):
         config_path = str(root_dir / "config.yaml")
         config = self.read_yaml(config_path)
         if model_path is None:
